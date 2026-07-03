@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0c0913">
+<title>ROTATION v0.2.0</title>
+<style>
+:root{
+  --bg:#0c0913; --panel:#161022; --panel2:#1d1530; --line:#2c2144;
+  --ink:#ece6f8; --dim:#8f85a8; --faint:#5c5375;
+  --ess:#a06bff; --ess2:#6d3df0; --gold:#ffb63d; --gold2:#ffd98a;
+  --red:#ff4a4a; --ember:#ff7a3d; --green:#57e389; --steel:#7f8ba3;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);overflow:hidden}
+body{
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color:var(--ink);
+  -webkit-user-select:none;user-select:none;
+  -webkit-touch-callout:none;
+  touch-action:manipulation;
+}
+#app{
+  height:100vh;height:100dvh;
+  max-width:540px;margin:0 auto;
+  display:flex;flex-direction:column;
+  position:relative;
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+}
+.hidden{display:none !important}
+
+/* ---------- boss frame ---------- */
+#hud{padding:8px 10px 4px}
+#bossframe{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px 9px;position:relative}
+#bossrow1{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+#bossname{font-size:12px;font-weight:800;letter-spacing:.14em;color:var(--ember)}
+#enrage{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--dim);font-variant-numeric:tabular-nums}
+#enrage.hot{color:var(--red);animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:.35}}
+#bosshpbar{height:16px;background:#0a0710;border:1px solid var(--line);border-radius:5px;position:relative;overflow:hidden}
+#bosshpfill{height:100%;width:100%;background:linear-gradient(180deg,#ff6a4a,#c22f2f);transition:width .12s linear}
+#bosshptext{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;letter-spacing:.1em;text-shadow:0 1px 2px #000}
+#bossrow3{display:flex;justify-content:space-between;align-items:center;margin-top:5px;min-height:16px}
+#rendtag{display:none;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:.12em;color:#ff8d7a}
+#rendtag.on{display:flex}
+#rendbar{width:52px;height:5px;background:#0a0710;border-radius:3px;overflow:hidden}
+#rendbar b{display:block;height:100%;background:#ff6a4a;width:100%}
+#dpslive{font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--dim);font-variant-numeric:tabular-nums}
+#castbar{margin-top:6px;height:15px;background:#0a0710;border:1px solid #6b2020;border-radius:5px;position:relative;overflow:hidden}
+#castfill{height:100%;width:0;background:linear-gradient(180deg,#ffd166,#ff7a3d)}
+#castname{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:900;letter-spacing:.22em;color:#1a0d05}
+
+/* ---------- scene ---------- */
+#scenewrap{flex:1;min-height:120px;position:relative;margin:4px 10px}
+#scene{position:absolute;inset:0;width:100%;height:100%;border-radius:12px}
+#banner{
+  position:absolute;left:0;right:0;top:34%;text-align:center;pointer-events:none;
+  font-size:21px;font-weight:900;letter-spacing:.3em;text-indent:.3em;
+  opacity:0;transition:opacity .18s;text-shadow:0 0 18px currentColor,0 2px 4px #000;
+}
+#banner.show{opacity:1}
+
+/* ---------- player strip / buffs ---------- */
+#playerstrip{display:flex;align-items:center;gap:8px;padding:2px 12px 4px;min-height:26px}
+#phpwrap{display:flex;align-items:center;gap:6px}
+#phplabel{font-size:9px;font-weight:800;letter-spacing:.18em;color:var(--dim)}
+#php{width:64px;height:7px;background:#0a0710;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+#phpfill{height:100%;width:100%;background:linear-gradient(180deg,#6ee7a0,#2f9e60)}
+#buffrow{display:flex;gap:6px;flex-wrap:wrap}
+.buff{font-size:9.5px;font-weight:800;letter-spacing:.1em;padding:3px 7px;border-radius:5px;border:1px solid;font-variant-numeric:tabular-nums}
+.buff.onsl{color:var(--ess);border-color:var(--ess);background:rgba(160,107,255,.12)}
+.buff.ovf{color:var(--gold);border-color:var(--gold);background:rgba(255,182,61,.12);animation:pulse 1s ease-in-out infinite}
+.buff.sund{color:var(--red);border-color:var(--red);background:rgba(255,74,74,.12)}
+@keyframes pulse{50%{filter:brightness(1.5)}}
+
+/* ---------- ultimate ---------- */
+#ultrow{display:flex;justify-content:center;padding:2px 0 6px}
+#ult{
+  width:84px;height:84px;border-radius:50%;border:none;position:relative;cursor:pointer;
+  background:conic-gradient(var(--gold) 0%, #241a3a 0%);
+  padding:5px;
+}
+#ultinner{
+  width:100%;height:100%;border-radius:50%;
+  background:radial-gradient(circle at 50% 38%, #2b2044, #120c1f 72%);
+  border:1px solid var(--line);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  color:var(--faint);
+}
+#ult svg{width:30px;height:30px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#ultname{font-size:7.5px;font-weight:900;letter-spacing:.22em;text-indent:.22em}
+#ultkey{position:absolute;bottom:2px;right:6px;font-size:9px;font-weight:800;color:var(--faint)}
+#ult.ready{filter:drop-shadow(0 0 14px rgba(255,182,61,.85));animation:ultpulse .9s ease-in-out infinite}
+#ult.ready #ultinner{color:var(--gold2);border-color:var(--gold);background:radial-gradient(circle at 50% 38%, #4a3312, #1c1206 72%)}
+@keyframes ultpulse{50%{transform:scale(1.05)}}
+
+/* ---------- essence ---------- */
+#essrow{padding:0 12px 7px}
+#essence{height:15px;background:#0a0710;border:1px solid var(--line);border-radius:6px;position:relative;overflow:hidden}
+#essfill{height:100%;width:0;background:linear-gradient(90deg,var(--ess2),var(--ess));transition:width .1s linear}
+#esstext{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;letter-spacing:.16em;text-shadow:0 1px 2px #000}
+
+/* ---------- action bar ---------- */
+#bar{display:flex;justify-content:center;gap:7px;padding:0 8px 12px}
+.ab{
+  width:56px;height:56px;border:none;position:relative;cursor:pointer;
+  background:linear-gradient(160deg,#251b3e,#151024);
+  clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%);
+  color:#c9bfe4;
+  display:flex;align-items:center;justify-content:center;
+  transition:filter .1s;
+}
+.ab svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.ab .key{position:absolute;top:3px;left:0;right:0;text-align:center;font-size:8px;font-weight:800;color:var(--faint);pointer-events:none}
+.ab .sub{position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:8px;font-weight:800;letter-spacing:.06em;color:var(--dim);pointer-events:none}
+.ab .cdswp{position:absolute;inset:0;pointer-events:none}
+.ab .cdnum{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;text-shadow:0 1px 3px #000;pointer-events:none}
+.ab.dim{filter:brightness(.42) saturate(.5)}
+.ab.proc{filter:drop-shadow(0 0 10px rgba(255,182,61,.9));color:var(--gold2);background:linear-gradient(160deg,#4a3312,#1c1206)}
+.ab.kick{filter:drop-shadow(0 0 10px rgba(255,74,74,.9));color:#ffb0a0;background:linear-gradient(160deg,#4a1812,#1c0806);animation:pulse .5s ease-in-out infinite}
+.ab.deny{animation:deny .18s}
+@keyframes deny{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+
+/* ---------- overlays ---------- */
+.overlay{
+  position:absolute;inset:0;z-index:20;
+  background:rgba(8,5,14,.94);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:20px;text-align:center;overflow-y:auto;
+}
+#gametitle{font-size:38px;font-weight:900;letter-spacing:.42em;text-indent:.42em;color:var(--ink);text-shadow:0 0 26px rgba(160,107,255,.65)}
+#tagline{margin-top:8px;font-size:12px;letter-spacing:.14em;color:var(--dim)}
+.bigbtn{
+  margin-top:26px;padding:15px 44px;font-size:14px;font-weight:900;letter-spacing:.26em;text-indent:.26em;
+  color:var(--ink);background:linear-gradient(160deg,#3a2a66,#221741);
+  border:1px solid var(--ess2);cursor:pointer;
+  clip-path:polygon(12% 0,88% 0,100% 30%,100% 70%,88% 100%,12% 100%,0 70%,0 30%);
+}
+.bigbtn:active{filter:brightness(1.3)}
+#howto{margin-top:24px;max-width:420px;color:var(--dim);font-size:11.5px;line-height:1.55;text-align:left}
+#howto summary{cursor:pointer;text-align:center;font-weight:800;letter-spacing:.2em;font-size:10px;color:var(--faint);list-style:none}
+#howto b{color:var(--ink)}
+#howto .h{color:var(--ember);font-weight:800;letter-spacing:.1em;margin-top:9px;display:block;font-size:10px}
+#version{position:absolute;bottom:12px;font-size:9px;letter-spacing:.2em;color:var(--faint)}
+
+/* results */
+#reshead{font-size:22px;font-weight:900;letter-spacing:.3em;text-indent:.3em}
+#rescause{margin-top:5px;font-size:11px;letter-spacing:.1em;color:var(--dim)}
+#grade{font-size:74px;font-weight:900;line-height:1;margin:12px 0 2px;text-shadow:0 0 30px currentColor}
+#resmain{font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--ink);font-variant-numeric:tabular-nums}
+#statlist{margin-top:14px;width:100%;max-width:400px;display:flex;flex-direction:column;gap:5px}
+.srow{display:grid;grid-template-columns:1fr auto;gap:2px 10px;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:6px 10px;align-items:center}
+.srow .l{font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--dim);text-align:left}
+.srow .v{font-size:11px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;text-align:right}
+.srow .b{grid-column:1/3;height:4px;background:#0a0710;border-radius:2px;overflow:hidden}
+.srow .b i{display:block;height:100%}
+#fix{margin-top:12px;max-width:400px;font-size:11px;line-height:1.5;color:var(--gold2);background:rgba(255,182,61,.08);border:1px solid rgba(255,182,61,.35);border-radius:8px;padding:9px 12px}
+#fix b{letter-spacing:.16em;font-size:9.5px;color:var(--gold)}
+#best{margin-top:10px;font-size:10px;letter-spacing:.12em;color:var(--faint)}
+#totitle{margin-top:12px;background:none;border:none;color:var(--faint);font-size:10px;letter-spacing:.2em;cursor:pointer;text-decoration:underline}
+
+@media (max-height:640px){
+  #ult{width:70px;height:70px}
+  .ab{width:50px;height:50px}
+  #gametitle{font-size:30px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important;transition:none !important}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="hud">
+    <div id="bossframe">
+      <div id="bossrow1"><span id="bossname">KAROTH, THE CINDER TYRANT</span><span id="enrage">4:00</span></div>
+      <div id="bosshpbar"><div id="bosshpfill"></div><span id="bosshptext">100%</span></div>
+      <div id="bossrow3">
+        <span id="rendtag">REND <span id="rendbar"><b></b></span></span>
+        <span id="dpslive"></span>
+      </div>
+      <div id="castbar" class="hidden"><div id="castfill"></div><span id="castname">OBLITERATE</span></div>
+    </div>
+  </div>
+
+  <div id="scenewrap">
+    <canvas id="scene"></canvas>
+    <div id="banner"></div>
+  </div>
+
+  <div id="playerstrip">
+    <div id="phpwrap"><span id="phplabel">YOU</span><span id="php"><span id="phpfill"></span></span></div>
+    <div id="buffrow"></div>
+  </div>
+
+  <div id="ultrow">
+    <button id="ult" aria-label="Cataclysm">
+      <div id="ultinner">
+        <svg viewBox="0 0 24 24"><path d="M12 2 L14.5 8.5 L21 9 L16 13.5 L17.8 20.5 L12 16.8 L6.2 20.5 L8 13.5 L3 9 L9.5 8.5 Z"/></svg>
+        <span id="ultname">CATACLYSM</span>
+      </div>
+      <span id="ultkey">R</span>
+    </button>
+  </div>
+
+  <div id="essrow">
+    <div id="essence"><div id="essfill"></div><span id="esstext">0 / 100</span></div>
+  </div>
+
+  <div id="bar"></div>
+
+  <div id="title" class="overlay">
+    <div id="gametitle">ROTATION</div>
+    <div id="tagline">ONE BOSS &middot; SEVEN BUTTONS &middot; YOUR PARSE</div>
+    <button class="bigbtn" id="startbtn">ENTER COMBAT</button>
+    <details id="howto">
+      <summary>HOW TO PLAY</summary>
+      <span class="h">YOUR KIT</span>
+      <b>Strike</b> builds 15 Essence and can proc <b>Overflow</b>.
+      <b>Rend</b> (20) applies a 12s bleed &mdash; keep it rolling.
+      <b>Ruin</b> (40) is your big spender.
+      <b>Riposte</b> is free and huge, but only while Overflow glows &mdash; 8s to use it.
+      <b>Onslaught</b> (45s CD) doubles Essence gain for 10s.
+      <b>Interrupt</b> has no cooldown &mdash; but kick empty air and it locks for 20s. <b>Cataclysm</b> charges from damage &mdash; quality damage charges faster.
+      <span class="h">THE FIGHT</span>
+      <b>Exposed:</b> boss takes +50% &mdash; burn everything.
+      <b>Carapace:</b> direct hits bounce for zero &mdash; hold, pool, let Rend tick.
+      <b>Casts:</b> interrupt or be Sundered. Miss two and you die. Enrage at 4:00 kills you.
+      <span class="h">SCORING</span>
+      Your parse is graded after the fight. The autopsy tells you exactly what to fix.
+    </details>
+    <div id="version">ROTATION v0.2.0</div>
+  </div>
+
+  <div id="results" class="overlay hidden">
+    <div id="reshead"></div>
+    <div id="rescause"></div>
+    <div id="grade"></div>
+    <div id="resmain"></div>
+    <div id="statlist"></div>
+    <div id="fix"></div>
+    <div id="best"></div>
+    <button class="bigbtn" id="retrybtn">RETRY</button>
+    <button id="totitle">BACK TO TITLE</button>
+  </div>
+
+</div>
+<script>
+"use strict";
+/* =====================================================================
+   ROTATION v0.2.0 — single-file MMO rotation score-attack
+   All tuning lives in CONFIG. Fixed-timestep sim, rAF render.
+   ===================================================================== */
+
+const CONFIG = {
+  TICK: 0.05,
+  GCD: 1.2,
+  ESSENCE_MAX: 100,
+  CRIT_CHANCE: 0.05,
+  CRIT_MULT: 1.5,
+  SUNDERED_MULT: 0.85,
+  EXPOSED_MULT: 1.5,
+  ABIL: {
+    strike:    { dmg: 520,  gen: 15, procChance: 0.25 },
+    rend:      { cost: 20, duration: 12, tickEvery: 2, tickDmg: 400 },
+    ruin:      { cost: 40, dmg: 2200 },
+    riposte:   { dmg: 2800, window: 8 },
+    onslaught: { cd: 45, duration: 10, genMult: 2 },
+    interrupt: { cd: 20 },  // no CD on a clean kick; this is the WHIFF lockout
+    cataclysm: { dmg: 6500, chargeMax: 150000 }
+  },
+  CHARGE: { exposedMult: 1.5, riposteMult: 1.5, critMult: 1.35 },
+  BOSS: {
+    hp: 245000,
+    enrageAt: 240,
+    annihilationCast: 2.5,
+    script: [
+      { t: 12, type: "cast", dur: 1.5 },
+      { t: 22, type: "cast", dur: 1.5 },
+      { t: 30, type: "cast", dur: 1.4 },
+      { t: 41, type: "cast", dur: 1.4 },
+      { t: 50, type: "cast", dur: 1.3 },
+      { t: 58, type: "cast", dur: 1.3 },
+      { t: 60, type: "exposed", dur: 15 },
+      { t: 66, type: "cast", dur: 1.25 },
+      { t: 73, type: "cast", dur: 1.25 },
+      { t: 80, type: "cast", dur: 1.2 },
+      { t: 87, type: "cast", dur: 1.2 },
+      { t: 90, type: "carapace", dur: 10 },
+      { t: 95, type: "cast", dur: 1.15 },
+      { t: 104, type: "cast", dur: 1.15 },
+      { t: 112, type: "cast", dur: 1.1 },
+      { t: 119, type: "cast", dur: 1.1 },
+      { t: 127, type: "cast", dur: 1.05 },
+      { t: 133, type: "cast", dur: 1.05 },
+      { t: 135, type: "exposed", dur: 15 },
+      { t: 140, type: "cast", dur: 1 },
+      { t: 148, type: "cast", dur: 1 },
+      { t: 155, type: "cast", dur: 0.95 },
+      { t: 162, type: "cast", dur: 0.95 },
+      { t: 165, type: "carapace", dur: 10 },
+      { t: 170, type: "cast", dur: 0.9 },
+      { t: 179, type: "cast", dur: 0.9 },
+      { t: 186, type: "cast", dur: 0.85 },
+      { t: 193, type: "cast", dur: 0.85 },
+      { t: 198, type: "cast", dur: 0.8 },
+      { t: 200, type: "exposed", dur: 15 },
+      { t: 205, type: "cast", dur: 0.8 },
+      { t: 212, type: "cast", dur: 0.75 },
+      { t: 219, type: "cast", dur: 0.75 },
+      { t: 226, type: "cast", dur: 0.75 },
+      { t: 232, type: "cast", dur: 0.75 },
+      { t: 237, type: "cast", dur: 0.75 }
+    ]
+  },
+  GRADE: {
+    dpsFloor: 500, dpsCeil: 1300,          // maps to 0..100
+    rendTarget: 0.85,                       // uptime for full marks
+    exposedTarget: 0.30,                    // share of damage in Exposed
+    essenceWasteCap: 400,                   // wasted essence for zero marks
+    chargeWasteGrace: 0.20,                 // free held-charge allowance (fraction of a bar)
+    chargeWasteCap: 0.6,                    // fraction of one full bar for zero marks
+    weights: { dps:.40, rend:.14, proc:.08, int:.12, exposed:.10, essW:.05, chargeW:.03, cara:.08 },
+    deathCap: 45,
+    letters: [ [90,"S"], [80,"A"], [66,"B"], [50,"C"], [35,"D"] ]
+  }
+};
+
+const REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------------------------------------------------------------------
+   AUDIO — synthesized, no assets
+--------------------------------------------------------------------- */
+const AudioSys = {
+  ctx: null, master: null, castOsc: null, castGain: null, rumble: null,
+  init() {
+    if (this.ctx) { if (this.ctx.state === "suspended") this.ctx.resume(); return; }
+    const C = window.AudioContext || window.webkitAudioContext;
+    if (!C) return;
+    this.ctx = new C();
+    this.master = this.ctx.createGain();
+    this.master.gain.value = 0.4;
+    this.master.connect(this.ctx.destination);
+  },
+  tone(f, dur, type, vol, slide, delay) {
+    if (!this.ctx) return;
+    const t0 = this.ctx.currentTime + (delay || 0);
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = type || "sine";
+    o.frequency.setValueAtTime(Math.max(f, 1), t0);
+    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(slide, 1), t0 + dur);
+    g.gain.setValueAtTime(vol || 0.4, t0);
+    g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+    o.connect(g); g.connect(this.master);
+    o.start(t0); o.stop(t0 + dur + 0.03);
+  },
+  noise(dur, vol, fc, delay) {
+    if (!this.ctx) return;
+    const t0 = this.ctx.currentTime + (delay || 0);
+    const len = Math.max(1, Math.floor(this.ctx.sampleRate * dur));
+    const buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    const src = this.ctx.createBufferSource(); src.buffer = buf;
+    const fl = this.ctx.createBiquadFilter(); fl.type = "lowpass"; fl.frequency.value = fc || 1200;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(vol || 0.3, t0);
+    g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+    src.connect(fl); fl.connect(g); g.connect(this.master);
+    src.start(t0); src.stop(t0 + dur + 0.03);
+  },
+  castStart(dur) {
+    if (!this.ctx) return;
+    this.castStop();
+    const t0 = this.ctx.currentTime;
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = "sawtooth";
+    o.frequency.setValueAtTime(160, t0);
+    o.frequency.exponentialRampToValueAtTime(920, t0 + dur);
+    g.gain.setValueAtTime(0.05, t0);
+    g.gain.linearRampToValueAtTime(0.11, t0 + dur);
+    o.connect(g); g.connect(this.master);
+    o.start(t0); o.stop(t0 + dur + 0.05);
+    this.castOsc = o; this.castGain = g;
+  },
+  castStop() {
+    if (this.castOsc) {
+      try { this.castGain.gain.cancelScheduledValues(0); this.castGain.gain.value = 0; this.castOsc.stop(); } catch (e) {}
+      this.castOsc = null; this.castGain = null;
+    }
+  },
+  rumbleStart() {
+    if (!this.ctx || this.rumble) return;
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = "triangle"; o.frequency.value = 42;
+    g.gain.value = 0.05;
+    o.connect(g); g.connect(this.master); o.start();
+    this.rumble = { o, g };
+  },
+  rumbleStop() {
+    if (this.rumble) { try { this.rumble.g.gain.value = 0; this.rumble.o.stop(); } catch (e) {} this.rumble = null; }
+  }
+};
+
+const sfx = {
+  strike()   { AudioSys.tone(340, .09, "square", .18, 480); AudioSys.noise(.05, .1, 2400); },
+  rend()     { AudioSys.noise(.22, .22, 700); AudioSys.tone(140, .2, "sawtooth", .12, 70); },
+  ruin()     { AudioSys.tone(95, .3, "sawtooth", .3, 40); AudioSys.noise(.2, .28, 500); },
+  riposte()  { AudioSys.tone(760, .12, "square", .2, 1400); AudioSys.tone(1180, .18, "sine", .18, 1600, .04); },
+  onslaught(){ AudioSys.tone(220, .5, "sawtooth", .16, 660); AudioSys.tone(330, .5, "sawtooth", .12, 990, .05); },
+  kick()     { AudioSys.noise(.08, .35, 3200); AudioSys.tone(1500, .1, "square", .2, 500); },
+  cataclysm(){ AudioSys.tone(60, .8, "sawtooth", .4, 28); AudioSys.noise(.6, .35, 400); AudioSys.tone(880, .4, "sine", .15, 110, .05); },
+  proc()     { AudioSys.tone(1050, .16, "sine", .22, 1500); AudioSys.tone(1560, .2, "sine", .16, 2000, .06); },
+  ultReady() { AudioSys.tone(520, .3, "sine", .22, 1040); AudioSys.tone(65, .5, "triangle", .2); AudioSys.rumbleStart(); },
+  crit()     { AudioSys.tone(1400, .08, "square", .12, 2100); },
+  deny()     { AudioSys.tone(160, .09, "square", .14, 120); },
+  hitTaken() { AudioSys.tone(90, .4, "sawtooth", .35, 40); AudioSys.noise(.3, .3, 600); },
+  death()    { AudioSys.tone(220, 1.2, "sawtooth", .3, 40); AudioSys.noise(.9, .25, 350); },
+  victory()  { AudioSys.tone(523, .18, "square", .18); AudioSys.tone(659, .18, "square", .18, null, .14); AudioSys.tone(784, .34, "square", .2, null, .28); AudioSys.tone(1046, .5, "sine", .2, null, .42); }
+};
+
+function vibrate(p) { if (navigator.vibrate) { try { navigator.vibrate(p); } catch (e) {} } }
+
+/* ---------------------------------------------------------------------
+   STATE
+--------------------------------------------------------------------- */
+let S = null;
+let best = { dps: 0, grade: "-" };
+
+function freshState() {
+  return {
+    mode: "combat", t: 0, over: false, dead: false, victory: false,
+    cause: "", killTime: 0,
+    essence: 0, gcd: 0,
+    bossHp: CONFIG.BOSS.hp, bossMax: CONFIG.BOSS.hp,
+    rendLeft: 0, rendTick: 0,
+    overflow: false, overflowLeft: 0,
+    onslaughtLeft: 0, onslaughtCd: 0,
+    interruptCd: 0, kickGrace: 0,
+    charge: 0, ultWasFull: false,
+    cast: null,
+    exposedLeft: 0, carapaceLeft: 0,
+    sundered: 0, playerHp: 100,
+    enraged: false,
+    scriptIdx: 0,
+    dissolve: 0,
+    stats: {
+      totalDmg: 0, exposedDmg: 0, rendTime: 0, essenceWasted: 0,
+      procsGained: 0, procsUsed: 0, procsExpired: 0,
+      intHit: 0, intMissed: 0, whiffs: 0, chargeWasted: 0, carapaceHits: 0, crits: 0
+    }
+  };
+}
+
+/* ---------------------------------------------------------------------
+   VFX state (render-side)
+--------------------------------------------------------------------- */
+const FX = {
+  floats: [], particles: [], projectiles: [],
+  shake: 0, flash: 0, flashColor: "255,255,255", flinch: 0, attack: 0,
+  reset() { this.floats.length = 0; this.particles.length = 0; this.projectiles.length = 0; this.shake = 0; this.flash = 0; this.flinch = 0; this.attack = 0; }
+};
+
+function addShake(m) { if (!REDUCED) FX.shake = Math.max(FX.shake, m); }
+function addFlash(a, color) { if (!REDUCED) { FX.flash = Math.max(FX.flash, a); FX.flashColor = color || "255,255,255"; } }
+
+function floatNum(txt, opts) {
+  const o = opts || {};
+  FX.floats.push({
+    txt, life: 1, x: 0.5 + (Math.random() - 0.5) * 0.22, y: 0.36 + (Math.random() - 0.5) * 0.1,
+    vy: -0.07, size: o.size || 15, color: o.color || "#efe9fb", crit: !!o.crit
+  });
+}
+
+function burst(nx, ny, color, n, speed) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, sp = (0.05 + Math.random() * 0.1) * (speed || 1);
+    FX.particles.push({ x: nx, y: ny, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 0.03, life: 0.5 + Math.random() * 0.5, color, size: 1.5 + Math.random() * 2.5 });
+  }
+}
+
+function projectile(color, size, fromTop) {
+  FX.projectiles.push({ t: 0, dur: fromTop ? 0.32 : 0.2, color, size: size || 4, fromTop: !!fromTop });
+}
+
+/* ---------------------------------------------------------------------
+   COMBAT CORE
+--------------------------------------------------------------------- */
+function gainEssence(base) {
+  const mult = S.onslaughtLeft > 0 ? CONFIG.ABIL.onslaught.genMult : 1;
+  const gain = base * mult;
+  const room = CONFIG.ESSENCE_MAX - S.essence;
+  if (gain > room) { S.stats.essenceWasted += gain - room; S.essence = CONFIG.ESSENCE_MAX; }
+  else S.essence += gain;
+}
+
+function addCharge(q) {
+  const max = CONFIG.ABIL.cataclysm.chargeMax;
+  if (S.charge >= max) { S.stats.chargeWasted += q; return; }
+  S.charge += q;
+  if (S.charge >= max) {
+    S.charge = max;
+    if (!S.ultWasFull) { S.ultWasFull = true; sfx.ultReady(); bannerMsg("CATACLYSM READY", "var(--gold)"); vibrate(30); }
+  }
+}
+
+// returns true if the hit landed, false if carapace ate it
+function dealDamage(base, kind) {
+  if (S.over) return false;
+  const direct = kind !== "rend";
+  if (direct && S.carapaceLeft > 0) {
+    S.stats.carapaceHits++;
+    floatNum("IMMUNE", { color: "#7f8ba3", size: 12 });
+    sfx.deny();
+    return false;
+  }
+  let dmg = base;
+  if (S.sundered > 0) dmg *= Math.pow(CONFIG.SUNDERED_MULT, S.sundered);
+  const exposed = S.exposedLeft > 0;
+  if (exposed) dmg *= CONFIG.EXPOSED_MULT;
+  const crit = Math.random() < CONFIG.CRIT_CHANCE;
+  if (crit) { dmg *= CONFIG.CRIT_MULT; S.stats.crits++; sfx.crit(); }
+  dmg = Math.round(dmg);
+
+  S.bossHp -= dmg;
+  S.stats.totalDmg += dmg;
+  if (exposed) S.stats.exposedDmg += dmg;
+
+  let q = dmg;
+  if (exposed) q *= CONFIG.CHARGE.exposedMult;
+  if (kind === "riposte") q *= CONFIG.CHARGE.riposteMult;
+  if (crit) q *= CONFIG.CHARGE.critMult;
+  addCharge(q);
+
+  const colors = { strike: "#efe9fb", rend: "#ff8d7a", ruin: "#c9a6ff", riposte: "#ffd98a", cataclysm: "#ff9a5a" };
+  const sizes  = { strike: 14, rend: 12, ruin: 19, riposte: 20, cataclysm: 26 };
+  floatNum(dmg.toLocaleString(), {
+    color: crit ? "#ffe24a" : colors[kind], size: crit ? sizes[kind] * 1.45 : sizes[kind], crit
+  });
+  FX.flinch = 0.15;
+  burst(0.5, 0.38, exposed ? "#ffd166" : "#b78bff", kind === "cataclysm" ? 34 : (kind === "rend" ? 3 : 8), kind === "cataclysm" ? 2 : 1);
+
+  if (S.bossHp <= 0) { S.bossHp = 0; win(); }
+  return true;
+}
+
+function grantOverflow() {
+  if (S.overflow) { S.overflowLeft = CONFIG.ABIL.riposte.window; return; }
+  S.overflow = true;
+  S.overflowLeft = CONFIG.ABIL.riposte.window;
+  S.stats.procsGained++;
+  sfx.proc();
+  addFlash(0.12, "255,182,61");
+  vibrate(15);
+}
+
+function denyBtn(id) {
+  sfx.deny();
+  const el = document.querySelector('[data-id="' + id + '"]') || (id === "cataclysm" ? UI.ult : null);
+  if (el) { el.classList.remove("deny"); void el.offsetWidth; el.classList.add("deny"); }
+}
+
+function press(id) {
+  if (!S || S.mode !== "combat" || S.over) return;
+  const A = CONFIG.ABIL;
+
+  if (id === "interrupt") {
+    if (S.interruptCd > 0) { denyBtn(id); return; }
+    if (S.cast && !S.cast.unstoppable) {
+      S.cast = null;
+      AudioSys.castStop();
+      S.stats.intHit++;
+      S.kickGrace = 0.25;              // forgive hardware double-taps briefly
+      sfx.kick();
+      bannerMsg("INTERRUPTED", "var(--green)");
+      addShake(5);
+      UI.castbar.classList.add("hidden");
+    } else {
+      if (S.kickGrace > 0) return;     // ghost tap right after a clean kick — ignore
+      S.stats.whiffs++;
+      S.interruptCd = A.interrupt.cd;  // kicked air: locked out
+      sfx.deny();
+      addShake(4);
+      bannerMsg("WHIFFED — KICK LOCKED 20s", "var(--red)");
+      denyBtn(id);
+    }
+    return;
+  }
+
+  if (id === "cataclysm") {
+    if (S.charge < A.cataclysm.chargeMax || S.gcd > 0) { denyBtn(id); return; }
+    S.charge = 0; S.ultWasFull = false;
+    AudioSys.rumbleStop();
+    S.gcd = CONFIG.GCD;
+    FX.attack = 0.25;
+    projectile("#ff9a5a", 9, true);
+    sfx.cataclysm();
+    addShake(14); addFlash(0.35, "255,154,90");
+    vibrate([20, 30, 60]);
+    dealDamage(A.cataclysm.dmg, "cataclysm");
+    if (S.over) return;
+    grantOverflow();
+    const fresh = S.rendLeft <= 0;
+    S.rendLeft = A.rend.duration;
+    if (fresh) S.rendTick = A.rend.tickEvery;
+    return;
+  }
+
+  if (S.gcd > 0) return;
+
+  if (id === "strike") {
+    S.gcd = CONFIG.GCD;
+    FX.attack = 0.18;
+    projectile("#b78bff", 4);
+    sfx.strike();
+    const hit = dealDamage(A.strike.dmg, "strike");
+    if (hit) {
+      gainEssence(A.strike.gen);
+      if (Math.random() < A.strike.procChance) grantOverflow();
+    }
+    return;
+  }
+
+  if (id === "rend") {
+    if (S.essence < A.rend.cost) { denyBtn(id); return; }
+    S.essence -= A.rend.cost;
+    S.gcd = CONFIG.GCD;
+    FX.attack = 0.18;
+    projectile("#ff6a4a", 5);
+    sfx.rend();
+    const fresh = S.rendLeft <= 0;
+    S.rendLeft = A.rend.duration;
+    if (fresh) S.rendTick = A.rend.tickEvery;
+    return;
+  }
+
+  if (id === "ruin") {
+    if (S.essence < A.ruin.cost) { denyBtn(id); return; }
+    S.essence -= A.ruin.cost;
+    S.gcd = CONFIG.GCD;
+    FX.attack = 0.22;
+    projectile("#c9a6ff", 7);
+    sfx.ruin();
+    addShake(6);
+    vibrate(15);
+    dealDamage(A.ruin.dmg, "ruin");
+    return;
+  }
+
+  if (id === "riposte") {
+    if (!S.overflow) { denyBtn(id); return; }
+    S.overflow = false; S.overflowLeft = 0;
+    S.stats.procsUsed++;
+    S.gcd = CONFIG.GCD;
+    FX.attack = 0.22;
+    projectile("#ffd98a", 7);
+    sfx.riposte();
+    addShake(7);
+    vibrate(15);
+    dealDamage(A.riposte.dmg, "riposte");
+    return;
+  }
+
+  if (id === "onslaught") {
+    if (S.onslaughtCd > 0) { denyBtn(id); return; }
+    S.onslaughtCd = A.onslaught.cd;
+    S.onslaughtLeft = A.onslaught.duration;
+    S.gcd = CONFIG.GCD;
+    sfx.onslaught();
+    bannerMsg("ONSLAUGHT", "var(--ess)");
+    addFlash(0.15, "160,107,255");
+    return;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   BOSS SCRIPT / SIM STEP
+--------------------------------------------------------------------- */
+function startCast(name, dur, unstoppable) {
+  S.cast = { name, dur, left: dur, unstoppable: !!unstoppable };
+  AudioSys.castStart(dur);
+  UI.castname.textContent = name;
+  UI.castbar.classList.remove("hidden");
+  bannerMsg(unstoppable ? name : "INTERRUPT THE CAST!", "var(--red)");
+}
+
+function castCompleted() {
+  const wasAnnihilation = S.cast.unstoppable;
+  S.cast = null;
+  AudioSys.castStop();
+  UI.castbar.classList.add("hidden");
+  if (wasAnnihilation) { die("Annihilated at enrage."); return; }
+  S.stats.intMissed++;
+  sfx.hitTaken();
+  addShake(12); addFlash(0.4, "255,74,74");
+  vibrate([40, 40, 40]);
+  if (S.sundered === 0) {
+    S.sundered = 1;
+    S.playerHp = 35;
+    bannerMsg("SUNDERED — DMG -15%", "var(--red)");
+  } else {
+    S.playerHp = 0;
+    die("Obliterate connected. Two casts, zero kicks.");
+  }
+}
+
+function stepBossScript() {
+  const sc = CONFIG.BOSS.script;
+  while (S.scriptIdx < sc.length && S.t >= sc[S.scriptIdx].t) {
+    const ev = sc[S.scriptIdx++];
+    if (ev.type === "cast") startCast("OBLITERATE", ev.dur, false);
+    else if (ev.type === "exposed") { S.exposedLeft = ev.dur; bannerMsg("EXPOSED — BURN", "var(--gold)"); sfx.proc(); }
+    else if (ev.type === "carapace") { S.carapaceLeft = ev.dur; bannerMsg("CARAPACE — HOLD", "var(--steel)"); AudioSys.tone(300, .3, "sine", .15, 150); }
+  }
+}
+
+function step(dt) {
+  if (S.over) return;
+  S.t += dt;
+
+  if (S.gcd > 0) S.gcd = Math.max(0, S.gcd - dt);
+  if (S.onslaughtCd > 0) S.onslaughtCd = Math.max(0, S.onslaughtCd - dt);
+  if (S.interruptCd > 0) S.interruptCd = Math.max(0, S.interruptCd - dt);
+  if (S.kickGrace > 0) S.kickGrace = Math.max(0, S.kickGrace - dt);
+  if (S.onslaughtLeft > 0) S.onslaughtLeft = Math.max(0, S.onslaughtLeft - dt);
+  if (S.exposedLeft > 0) S.exposedLeft = Math.max(0, S.exposedLeft - dt);
+  if (S.carapaceLeft > 0) S.carapaceLeft = Math.max(0, S.carapaceLeft - dt);
+
+  if (S.overflow) {
+    S.overflowLeft -= dt;
+    if (S.overflowLeft <= 0) { S.overflow = false; S.overflowLeft = 0; S.stats.procsExpired++; floatNum("PROC LOST", { color: "#8f85a8", size: 11 }); }
+  }
+
+  if (S.rendLeft > 0) {
+    S.stats.rendTime += dt;
+    S.rendLeft -= dt;
+    S.rendTick -= dt;
+    if (S.rendTick <= 0) {
+      S.rendTick += CONFIG.ABIL.rend.tickEvery;
+      dealDamage(CONFIG.ABIL.rend.tickDmg, "rend");
+      if (S.over) return;
+    }
+    if (S.rendLeft <= 0) { S.rendLeft = 0; }
+  }
+
+  if (S.cast) {
+    S.cast.left -= dt;
+    if (S.cast.left <= 0) { castCompleted(); if (S.over) return; }
+  }
+
+  stepBossScript();
+
+  if (!S.enraged && S.t >= CONFIG.BOSS.enrageAt) {
+    S.enraged = true;
+    bannerMsg("ENRAGE", "var(--red)");
+    sfx.hitTaken();
+    startCast("ANNIHILATION", CONFIG.BOSS.annihilationCast, true);
+  }
+}
+
+function win() {
+  if (S.over) return;
+  S.over = true; S.victory = true; S.killTime = S.t;
+  AudioSys.castStop(); AudioSys.rumbleStop();
+  UI.castbar.classList.add("hidden");
+  sfx.victory();
+  bannerMsg("BOSS SLAIN", "var(--gold)");
+  addFlash(0.3, "255,217,138");
+  vibrate([30, 50, 30, 50, 80]);
+  setTimeout(showResults, 1300);
+}
+
+function die(cause) {
+  if (S.over) return;
+  S.over = true; S.dead = true; S.cause = cause; S.killTime = S.t;
+  AudioSys.castStop(); AudioSys.rumbleStop();
+  UI.castbar.classList.add("hidden");
+  sfx.death();
+  bannerMsg("YOU DIED", "var(--red)");
+  addFlash(0.55, "255,40,40");
+  addShake(16);
+  vibrate([80, 60, 120]);
+  setTimeout(showResults, 1500);
+}
+
+/* ---------------------------------------------------------------------
+   GRADING / RESULTS
+--------------------------------------------------------------------- */
+function clamp01(v) { return Math.max(0, Math.min(1, v)); }
+
+function computeGrade() {
+  const st = S.stats, G = CONFIG.GRADE;
+  const ft = Math.max(S.killTime || S.t, 1);
+  const dps = st.totalDmg / ft;
+
+  const comp = {};
+  comp.dps     = clamp01((dps - G.dpsFloor) / (G.dpsCeil - G.dpsFloor)) * 100;
+  comp.rend    = Math.min(100, (st.rendTime / ft) / G.rendTarget * 100);
+  const procsTotal = st.procsUsed + st.procsExpired;
+  comp.proc    = procsTotal > 0 ? (st.procsUsed / procsTotal) * 100 : 100;
+  const intTotal = st.intHit + st.intMissed + st.whiffs * 0.5;
+  comp.int     = intTotal > 0 ? (st.intHit / intTotal) * 100 : 100;
+  comp.exposed = st.totalDmg > 0 ? Math.min(100, (st.exposedDmg / st.totalDmg) / G.exposedTarget * 100) : 0;
+  comp.essW    = (1 - clamp01(st.essenceWasted / G.essenceWasteCap)) * 100;
+  const cMax = CONFIG.ABIL.cataclysm.chargeMax;
+  const cWaste = Math.max(0, st.chargeWasted - cMax * G.chargeWasteGrace);
+  comp.chargeW = (1 - clamp01(cWaste / (cMax * G.chargeWasteCap))) * 100;
+  comp.cara    = Math.max(0, 100 - st.carapaceHits * 20);
+
+  let score = 0;
+  for (const k in G.weights) score += G.weights[k] * comp[k];
+  if (!S.victory) score = Math.min(score, G.deathCap);
+
+  let letter = "F";
+  for (const pair of G.letters) { if (score >= pair[0]) { letter = pair[1]; break; } }
+
+  return { dps: Math.round(dps), ft, comp, score, letter };
+}
+
+const FIX_MSG = {
+  dps:     "Push more damage. Never sit on the GCD — Strike is always better than nothing.",
+  rend:    "Rend fell off. Keep the bleed rolling for the whole fight.",
+  proc:    "Overflow procs expired. Spend Riposte the moment it lights up.",
+  int:     "Kicks failed you — a cast got through or you kicked air. Press it only when the cast bar is up.",
+  exposed: "Pool Essence and hold cooldowns for Exposed windows, then dump everything.",
+  essW:    "Essence overcapped. Spend Ruin before you hit 100.",
+  chargeW: "Cataclysm sat full too long. Fire it into an Exposed window sooner.",
+  cara:    "You hit into Carapace. When the shell is up: hands off, let Rend tick."
+};
+
+const GRADE_COLOR = { S: "#ffd98a", A: "#a06bff", B: "#57e389", C: "#6fb2ff", D: "#ff9a5a", F: "#ff4a4a" };
+
+function fmtTime(s) {
+  const m = Math.floor(s / 60), r = Math.floor(s % 60);
+  return m + ":" + String(r).padStart(2, "0");
+}
+
+function statRow(label, value, score) {
+  const hasBar = score !== null && score !== undefined;
+  let barColor = "#57e389";
+  if (hasBar) { if (score < 45) barColor = "#ff4a4a"; else if (score < 75) barColor = "#ffb63d"; }
+  return '<div class="srow"><span class="l">' + label + '</span><span class="v">' + value + '</span>' +
+    (hasBar ? '<span class="b"><i style="width:' + Math.round(score) + '%;background:' + barColor + '"></i></span>' : "") +
+    "</div>";
+}
+
+function showResults() {
+  const g = computeGrade();
+  const st = S.stats;
+
+  if (S.victory && g.dps > best.dps) { best.dps = g.dps; best.grade = g.letter; }
+
+  UI.reshead.textContent = S.victory ? "BOSS SLAIN" : "YOU DIED";
+  UI.reshead.style.color = S.victory ? "var(--gold)" : "var(--red)";
+  UI.rescause.textContent = S.victory
+    ? "Kill time " + fmtTime(S.killTime) + " — " + fmtTime(Math.max(0, CONFIG.BOSS.enrageAt - S.killTime)) + " before enrage"
+    : S.cause + " (boss at " + Math.ceil(S.bossHp / S.bossMax * 100) + "%)";
+  UI.grade.textContent = g.letter;
+  UI.grade.style.color = GRADE_COLOR[g.letter];
+  UI.resmain.textContent = g.dps.toLocaleString() + " DPS · " + st.totalDmg.toLocaleString() + " damage";
+
+  const rendPct = Math.round(st.rendTime / g.ft * 100);
+  const expShare = st.totalDmg > 0 ? Math.round(st.exposedDmg / st.totalDmg * 100) : 0;
+  const chargePct = Math.round(st.chargeWasted / CONFIG.ABIL.cataclysm.chargeMax * 100);
+
+  UI.statlist.innerHTML =
+    statRow("REND UPTIME", rendPct + "%", g.comp.rend) +
+    statRow("OVERFLOW PROCS", st.procsUsed + " used / " + st.procsExpired + " expired", g.comp.proc) +
+    statRow("INTERRUPTS", st.intHit + " hit / " + st.intMissed + " missed / " + st.whiffs + " whiffed", g.comp.int) +
+    statRow("EXPOSED DMG SHARE", expShare + "% (target 30%+)", g.comp.exposed) +
+    statRow("ESSENCE OVERCAPPED", Math.round(st.essenceWasted) + " wasted", g.comp.essW) +
+    statRow("CATACLYSM OVERCHARGE", chargePct + "% of a bar wasted", g.comp.chargeW) +
+    statRow("HITS INTO CARAPACE", String(st.carapaceHits), g.comp.cara) +
+    statRow("CRITS", String(st.crits), null);
+
+  let worstKey = "dps", worstVal = Infinity;
+  for (const k in g.comp) { if (g.comp[k] < worstVal) { worstVal = g.comp[k]; worstKey = k; } }
+  UI.fix.innerHTML = "<b>PRIORITY FIX</b><br>" + FIX_MSG[worstKey];
+
+  UI.best.textContent = best.dps > 0 ? "SESSION BEST — " + best.dps.toLocaleString() + " DPS (" + best.grade + ")" : "";
+  UI.results.classList.remove("hidden");
+  S.mode = "results";
+}
+
+/* ---------------------------------------------------------------------
+   RENDER — canvas scene
+--------------------------------------------------------------------- */
+const cv = document.getElementById("scene");
+const cx = cv.getContext("2d");
+let CW = 0, CH = 0;
+
+function resize() {
+  const r = cv.getBoundingClientRect();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  CW = Math.max(1, Math.floor(r.width));
+  CH = Math.max(1, Math.floor(r.height));
+  cv.width = Math.floor(CW * dpr);
+  cv.height = Math.floor(CH * dpr);
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener("resize", resize);
+
+let emberTimer = 0;
+
+function drawScene(dt, now) {
+  cx.clearRect(0, 0, CW, CH);
+
+  // background
+  const bgGrad = cx.createLinearGradient(0, 0, 0, CH);
+  bgGrad.addColorStop(0, "#120b1e");
+  bgGrad.addColorStop(1, "#0a0712");
+  cx.fillStyle = bgGrad;
+  cx.fillRect(0, 0, CW, CH);
+
+  // shake
+  cx.save();
+  if (FX.shake > 0.2) {
+    cx.translate((Math.random() - 0.5) * FX.shake, (Math.random() - 0.5) * FX.shake);
+    FX.shake *= Math.pow(0.001, dt);
+  } else FX.shake = 0;
+
+  const t = S ? S.t : now / 1000;
+  const inCombat = S && (S.mode === "combat" || S.mode === "results");
+
+  // ambient embers
+  emberTimer -= dt;
+  if (emberTimer <= 0) {
+    emberTimer = 0.25;
+    FX.particles.push({ x: Math.random(), y: 1.05, vx: (Math.random() - 0.5) * 0.02, vy: -0.03 - Math.random() * 0.04, life: 2 + Math.random() * 2, color: "#ff7a3d", size: 1 + Math.random() * 1.5, dim: true });
+  }
+
+  const groundY = CH * 0.86;
+  // ground line + rune ring
+  cx.strokeStyle = "rgba(160,107,255,.12)";
+  cx.lineWidth = 1;
+  cx.beginPath(); cx.moveTo(CW * 0.05, groundY); cx.lineTo(CW * 0.95, groundY); cx.stroke();
+  cx.beginPath(); cx.ellipse(CW * 0.5, groundY - 2, CW * 0.26, 8, 0, 0, Math.PI * 2);
+  cx.strokeStyle = "rgba(255,122,61,.14)"; cx.stroke();
+
+  if (inCombat) drawBoss(t, dt, groundY);
+  if (inCombat) drawPlayer(t, dt, groundY);
+
+  // projectiles
+  for (let i = FX.projectiles.length - 1; i >= 0; i--) {
+    const p = FX.projectiles[i];
+    p.t += dt;
+    const f = Math.min(1, p.t / p.dur);
+    let px, py;
+    if (p.fromTop) { px = CW * 0.5; py = -20 + (CH * 0.36 + 20) * f * f; }
+    else {
+      px = CW * 0.5 + (0) * f; // straight up from staff
+      const sx = CW * 0.5, sy = groundY - 46, ex = CW * 0.5, ey = CH * 0.4;
+      px = sx + (ex - sx) * f; py = sy + (ey - sy) * f - Math.sin(f * Math.PI) * 18;
+    }
+    cx.beginPath();
+    cx.fillStyle = p.color;
+    cx.shadowColor = p.color; cx.shadowBlur = 12;
+    cx.arc(px, py, p.size, 0, Math.PI * 2);
+    cx.fill();
+    cx.shadowBlur = 0;
+    if (f >= 1) { burst(0.5, 0.38, p.color, p.fromTop ? 20 : 5, p.fromTop ? 2 : 1); FX.projectiles.splice(i, 1); }
+  }
+
+  // particles
+  for (let i = FX.particles.length - 1; i >= 0; i--) {
+    const p = FX.particles[i];
+    p.life -= dt;
+    if (p.life <= 0) { FX.particles.splice(i, 1); continue; }
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    cx.globalAlpha = Math.min(1, p.life) * (p.dim ? 0.4 : 0.9);
+    cx.fillStyle = p.color;
+    cx.fillRect(p.x * CW, p.y * CH, p.size, p.size);
+  }
+  cx.globalAlpha = 1;
+
+  // floating numbers
+  for (let i = FX.floats.length - 1; i >= 0; i--) {
+    const f = FX.floats[i];
+    f.life -= dt * 0.75;
+    if (f.life <= 0) { FX.floats.splice(i, 1); continue; }
+    f.y += f.vy * dt;
+    const a = Math.min(1, f.life * 2);
+    cx.globalAlpha = a;
+    cx.font = "900 " + f.size + "px system-ui,sans-serif";
+    cx.textAlign = "center";
+    cx.fillStyle = f.color;
+    cx.shadowColor = "#000"; cx.shadowBlur = 4;
+    cx.fillText(f.txt + (f.crit ? "!" : ""), f.x * CW, f.y * CH);
+    cx.shadowBlur = 0;
+  }
+  cx.globalAlpha = 1;
+
+  cx.restore();
+
+  // full-screen flash
+  if (FX.flash > 0.01) {
+    cx.fillStyle = "rgba(" + FX.flashColor + "," + FX.flash + ")";
+    cx.fillRect(0, 0, CW, CH);
+    FX.flash *= Math.pow(0.0005, dt);
+  }
+}
+
+function drawBoss(t, dt, groundY) {
+  const bx = CW * 0.5;
+  const bob = Math.sin(t * 1.6) * 4;
+  const by = CH * 0.40 + bob;
+  const R = Math.min(CW * 0.24, CH * 0.30);
+
+  const exposed = S.exposedLeft > 0;
+  const carapace = S.carapaceLeft > 0;
+  const casting = !!S.cast;
+  const enraged = S.enraged;
+
+  let alpha = 1;
+  if (S.victory) { S.dissolve = Math.min(1, S.dissolve + dt * 0.7); alpha = 1 - S.dissolve;
+    if (Math.random() < 0.5) FX.particles.push({ x: 0.5 + (Math.random() - 0.5) * 0.3, y: 0.4 + (Math.random() - 0.5) * 0.3, vx: (Math.random() - 0.5) * 0.05, vy: -0.08, life: 1.2, color: "#ff9a5a", size: 2 });
+  }
+  if (alpha <= 0) return;
+  cx.save();
+  cx.globalAlpha = alpha;
+
+  // flinch
+  if (FX.flinch > 0) { FX.flinch -= dt; cx.translate((Math.random() - 0.5) * 5, (Math.random() - 0.5) * 5); }
+
+  // aura
+  let auraColor = "rgba(255,122,61,.10)";
+  if (exposed) auraColor = "rgba(255,209,102,.20)";
+  if (enraged) auraColor = "rgba(255,40,40," + (0.18 + Math.sin(t * 8) * 0.08) + ")";
+  const aura = cx.createRadialGradient(bx, by, R * 0.2, bx, by, R * 1.7);
+  aura.addColorStop(0, auraColor);
+  aura.addColorStop(1, "rgba(0,0,0,0)");
+  cx.fillStyle = aura;
+  cx.fillRect(bx - R * 2, by - R * 2, R * 4, R * 4);
+
+  // body — obsidian monolith
+  cx.beginPath();
+  cx.moveTo(bx - R * 0.62, by + R * 0.9);
+  cx.lineTo(bx - R * 0.78, by - R * 0.1);
+  cx.lineTo(bx - R * 0.34, by - R * 0.82);
+  cx.lineTo(bx + R * 0.34, by - R * 0.82);
+  cx.lineTo(bx + R * 0.78, by - R * 0.1);
+  cx.lineTo(bx + R * 0.62, by + R * 0.9);
+  cx.closePath();
+  cx.fillStyle = exposed ? "#2a1c34" : "#1d1428";
+  cx.fill();
+  cx.strokeStyle = enraged ? "#ff4a4a" : "#3a2a52";
+  cx.lineWidth = 2;
+  cx.stroke();
+
+  // horns
+  cx.fillStyle = "#120c1c";
+  cx.beginPath();
+  cx.moveTo(bx - R * 0.34, by - R * 0.80);
+  cx.quadraticCurveTo(bx - R * 0.75, by - R * 1.05, bx - R * 0.52, by - R * 1.38);
+  cx.quadraticCurveTo(bx - R * 0.42, by - R * 1.0, bx - R * 0.14, by - R * 0.84);
+  cx.closePath(); cx.fill();
+  cx.beginPath();
+  cx.moveTo(bx + R * 0.34, by - R * 0.80);
+  cx.quadraticCurveTo(bx + R * 0.75, by - R * 1.05, bx + R * 0.52, by - R * 1.38);
+  cx.quadraticCurveTo(bx + R * 0.42, by - R * 1.0, bx + R * 0.14, by - R * 0.84);
+  cx.closePath(); cx.fill();
+
+  // eyes
+  let eyeColor = "#ff7a3d";
+  if (casting) eyeColor = "#fff3d6";
+  if (exposed) eyeColor = "#ffd166";
+  if (enraged) eyeColor = "#ff2828";
+  cx.fillStyle = eyeColor;
+  cx.shadowColor = eyeColor; cx.shadowBlur = 10;
+  cx.fillRect(bx - R * 0.30, by - R * 0.55, R * 0.20, R * 0.06);
+  cx.fillRect(bx + R * 0.10, by - R * 0.55, R * 0.20, R * 0.06);
+  cx.shadowBlur = 0;
+
+  // core
+  const coreR = exposed ? R * 0.30 : R * 0.18;
+  const coreGlow = 0.7 + Math.sin(t * (exposed ? 9 : 3)) * 0.3;
+  const core = cx.createRadialGradient(bx, by + R * 0.1, 1, bx, by + R * 0.1, coreR);
+  core.addColorStop(0, exposed ? "rgba(255,240,190," + coreGlow + ")" : "rgba(255,140,80," + coreGlow * 0.85 + ")");
+  core.addColorStop(1, "rgba(120,30,10,0)");
+  cx.fillStyle = core;
+  cx.beginPath(); cx.arc(bx, by + R * 0.1, coreR, 0, Math.PI * 2); cx.fill();
+
+  if (exposed) {
+    cx.strokeStyle = "rgba(255,209,102,.75)";
+    cx.lineWidth = 1.5;
+    for (let i = 0; i < 6; i++) {
+      const a = i / 6 * Math.PI * 2 + 0.4;
+      cx.beginPath();
+      cx.moveTo(bx + Math.cos(a) * coreR * 0.5, by + R * 0.1 + Math.sin(a) * coreR * 0.5);
+      cx.lineTo(bx + Math.cos(a) * coreR * 1.5, by + R * 0.1 + Math.sin(a) * coreR * 1.5);
+      cx.stroke();
+    }
+  }
+
+  // carapace shell
+  if (carapace) {
+    cx.globalAlpha = alpha * 0.85;
+    cx.strokeStyle = "#9db0cc";
+    cx.fillStyle = "rgba(127,139,163,.28)";
+    cx.lineWidth = 2;
+    const hr = R * 1.05;
+    cx.beginPath();
+    for (let i = 0; i <= 6; i++) {
+      const a = i / 6 * Math.PI * 2 - Math.PI / 2;
+      const px = bx + Math.cos(a) * hr, py = by + Math.sin(a) * hr;
+      if (i === 0) cx.moveTo(px, py); else cx.lineTo(px, py);
+    }
+    cx.closePath(); cx.fill(); cx.stroke();
+    // specular lines
+    cx.strokeStyle = "rgba(220,230,245,.35)";
+    cx.lineWidth = 1;
+    cx.beginPath(); cx.moveTo(bx - hr * 0.5, by - hr * 0.6); cx.lineTo(bx - hr * 0.1, by - hr * 0.95); cx.stroke();
+    cx.globalAlpha = alpha;
+  }
+
+  // casting orb
+  if (casting) {
+    const prog = 1 - S.cast.left / S.cast.dur;
+    const orbR = 4 + prog * R * 0.3;
+    const oy = by - R * 1.35;
+    cx.fillStyle = S.cast.unstoppable ? "#ff2828" : "#ffd166";
+    cx.shadowColor = cx.fillStyle; cx.shadowBlur = 18;
+    cx.beginPath(); cx.arc(bx, oy, orbR, 0, Math.PI * 2); cx.fill();
+    cx.shadowBlur = 0;
+  }
+
+  cx.restore();
+}
+
+function drawPlayer(t, dt, groundY) {
+  const px = CW * 0.5, py = groundY;
+  if (FX.attack > 0) FX.attack -= dt;
+  const raise = FX.attack > 0 ? 8 : 0;
+  const bob = Math.sin(t * 2.2) * 1.5;
+
+  cx.save();
+  cx.translate(px, py + bob);
+
+  // robe
+  cx.fillStyle = "#251b3e";
+  cx.beginPath();
+  cx.moveTo(-13, 0);
+  cx.lineTo(-7, -30);
+  cx.lineTo(7, -30);
+  cx.lineTo(13, 0);
+  cx.closePath();
+  cx.fill();
+  cx.strokeStyle = "#3a2a52"; cx.lineWidth = 1.5; cx.stroke();
+
+  // hood + head
+  cx.fillStyle = "#1a1230";
+  cx.beginPath(); cx.arc(0, -34, 7, 0, Math.PI * 2); cx.fill();
+  cx.fillStyle = "#a06bff";
+  cx.fillRect(-3, -35, 6, 2);
+
+  // staff
+  cx.strokeStyle = "#4a3a6a"; cx.lineWidth = 2.5;
+  cx.beginPath(); cx.moveTo(10, -4); cx.lineTo(15, -42 - raise); cx.stroke();
+  const orbGlow = FX.attack > 0 ? 1 : 0.55 + Math.sin(t * 3) * 0.15;
+  cx.fillStyle = "rgba(160,107,255," + orbGlow + ")";
+  cx.shadowColor = "#a06bff"; cx.shadowBlur = 10;
+  cx.beginPath(); cx.arc(15, -46 - raise, 4, 0, Math.PI * 2); cx.fill();
+  cx.shadowBlur = 0;
+
+  cx.restore();
+}
+
+/* ---------------------------------------------------------------------
+   UI refs + per-frame DOM updates
+--------------------------------------------------------------------- */
+const UI = {};
+["bosshpfill","bosshptext","enrage","rendtag","rendbar","dpslive","castbar","castfill","castname",
+ "banner","buffrow","phpfill","ult","essfill","esstext","bar","title","results","reshead","rescause",
+ "grade","resmain","statlist","fix","best","startbtn","retrybtn","totitle"].forEach(id => UI[id] = document.getElementById(id));
+UI.rendbarFill = UI.rendtag.querySelector("b");
+
+let bannerTimer = null;
+function bannerMsg(txt, color) {
+  UI.banner.textContent = txt;
+  UI.banner.style.color = color || "var(--ink)";
+  UI.banner.classList.add("show");
+  if (bannerTimer) clearTimeout(bannerTimer);
+  bannerTimer = setTimeout(() => UI.banner.classList.remove("show"), 1400);
+}
+
+const ICONS = {
+  strike:    '<svg viewBox="0 0 24 24"><path d="M5 19 L19 5 M13 5 h6 v6"/></svg>',
+  rend:      '<svg viewBox="0 0 24 24"><path d="M12 3 C12 3 5.5 11.5 5.5 15 a6.5 6.5 0 0 0 13 0 C18.5 11.5 12 3 12 3 Z"/></svg>',
+  ruin:      '<svg viewBox="0 0 24 24"><path d="M12 2 L14 9 L21 9 L15.5 13.5 L17.5 21 L12 16.5 L6.5 21 L8.5 13.5 L3 9 L10 9 Z"/></svg>',
+  riposte:   '<svg viewBox="0 0 24 24"><path d="M13 2 L4 14 h6 l-1 8 L18 10 h-6 Z"/></svg>',
+  onslaught: '<svg viewBox="0 0 24 24"><path d="M12 21 V5 M6 11 L12 5 L18 11 M6 18 L12 12 L18 18"/></svg>',
+  interrupt: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.5 5.5 L18.5 18.5"/></svg>'
+};
+
+const BUTTONS = [
+  { id: "strike",    key: "1", sub: "+15" },
+  { id: "rend",      key: "2", sub: "20" },
+  { id: "ruin",      key: "3", sub: "40" },
+  { id: "riposte",   key: "4", sub: "PROC" },
+  { id: "onslaught", key: "5", sub: "45s" },
+  { id: "interrupt", key: "6", sub: "KICK" }
+];
+
+function buildBar() {
+  UI.bar.innerHTML = "";
+  for (const b of BUTTONS) {
+    const el = document.createElement("button");
+    el.className = "ab";
+    el.dataset.id = b.id;
+    el.setAttribute("aria-label", b.id);
+    el.innerHTML = '<span class="key">' + b.key + "</span>" + ICONS[b.id] +
+      '<span class="sub">' + b.sub + '</span><div class="cdswp"></div><div class="cdnum"></div>';
+    UI.bar.appendChild(el);
+  }
+}
+
+function sweepStyle(frac) {
+  if (frac <= 0.001) return "";
+  return "conic-gradient(rgba(6,3,12,.8) " + (frac * 100).toFixed(1) + "%, transparent 0)";
+}
+
+let buffRebuild = 0;
+
+function updateDOM(dt) {
+  if (!S) return;
+  const A = CONFIG.ABIL;
+
+  // boss frame
+  const hpPct = Math.max(0, S.bossHp / S.bossMax);
+  UI.bosshpfill.style.width = (hpPct * 100).toFixed(2) + "%";
+  UI.bosshptext.textContent = (hpPct * 100).toFixed(1) + "%";
+
+  const rem = Math.max(0, CONFIG.BOSS.enrageAt - S.t);
+  UI.enrage.textContent = S.enraged ? "ENRAGE" : fmtTime(rem);
+  UI.enrage.classList.toggle("hot", S.enraged || rem < 30);
+
+  if (S.rendLeft > 0) {
+    UI.rendtag.classList.add("on");
+    UI.rendbarFill.style.width = (S.rendLeft / A.rend.duration * 100).toFixed(0) + "%";
+  } else UI.rendtag.classList.remove("on");
+
+  UI.dpslive.textContent = S.t > 1 ? Math.round(S.stats.totalDmg / S.t).toLocaleString() + " DPS" : "";
+
+  if (S.cast) UI.castfill.style.width = ((1 - S.cast.left / S.cast.dur) * 100).toFixed(1) + "%";
+
+  // player
+  UI.phpfill.style.width = S.playerHp + "%";
+  UI.phpfill.style.background = S.playerHp > 50 ? "linear-gradient(180deg,#6ee7a0,#2f9e60)" : "linear-gradient(180deg,#ffb63d,#c2542f)";
+
+  // buffs (throttled rebuild)
+  buffRebuild -= dt;
+  if (buffRebuild <= 0) {
+    buffRebuild = 0.1;
+    let h = "";
+    if (S.onslaughtLeft > 0) h += '<span class="buff onsl">ONSLAUGHT ' + S.onslaughtLeft.toFixed(0) + "s</span>";
+    if (S.overflow) h += '<span class="buff ovf">OVERFLOW ' + S.overflowLeft.toFixed(0) + "s</span>";
+    if (S.sundered > 0) h += '<span class="buff sund">SUNDERED</span>';
+    UI.buffrow.innerHTML = h;
+  }
+
+  // essence
+  UI.essfill.style.width = S.essence + "%";
+  UI.esstext.textContent = Math.floor(S.essence) + " / " + CONFIG.ESSENCE_MAX;
+
+  // ult
+  const cfrac = S.charge / A.cataclysm.chargeMax;
+  UI.ult.style.background = "conic-gradient(var(--gold) " + (cfrac * 100).toFixed(1) + "%, #241a3a 0)";
+  UI.ult.classList.toggle("ready", cfrac >= 1 && !S.over);
+
+  // buttons
+  const gcdFrac = S.gcd / CONFIG.GCD;
+  for (const b of UI.bar.children) {
+    const id = b.dataset.id;
+    let cdFrac = 0, cdLeft = 0;
+    if (id === "onslaught") { cdFrac = S.onslaughtCd / A.onslaught.cd; cdLeft = S.onslaughtCd; }
+    if (id === "interrupt") { cdFrac = S.interruptCd / A.interrupt.cd; cdLeft = S.interruptCd; }
+    const frac = id === "interrupt" ? cdFrac : Math.max(cdFrac, gcdFrac);
+    b.querySelector(".cdswp").style.background = sweepStyle(frac);
+    b.querySelector(".cdnum").textContent = cdLeft > CONFIG.GCD ? Math.ceil(cdLeft) : "";
+
+    let dim = false;
+    if (id === "rend") dim = S.essence < A.rend.cost;
+    if (id === "ruin") dim = S.essence < A.ruin.cost;
+    if (id === "riposte") dim = !S.overflow;
+    b.classList.toggle("dim", dim);
+    b.classList.toggle("proc", id === "riposte" && S.overflow);
+    b.classList.toggle("kick", id === "interrupt" && !!S.cast && !S.cast.unstoppable && S.interruptCd <= 0);
+  }
+}
+
+/* ---------------------------------------------------------------------
+   INPUT
+--------------------------------------------------------------------- */
+function bindInput() {
+  UI.bar.addEventListener("pointerdown", e => {
+    const btn = e.target.closest(".ab");
+    if (!btn) return;
+    e.preventDefault();
+    AudioSys.init();
+    press(btn.dataset.id);
+  });
+  UI.ult.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    AudioSys.init();
+    press("cataclysm");
+  });
+  document.addEventListener("contextmenu", e => {
+    if (e.target.closest && e.target.closest(".ab, #ult")) e.preventDefault();
+  });
+
+  const keymap = { "1": "strike", "2": "rend", "3": "ruin", "4": "riposte", "5": "onslaught", "6": "interrupt", "r": "cataclysm", "R": "cataclysm", " ": "cataclysm" };
+  document.addEventListener("keydown", e => {
+    if (e.repeat) return;
+    if (S && S.mode === "results" && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); startCombat(); return; }
+    if (!S || S.mode !== "combat") {
+      if (e.key === "Enter" && !UI.title.classList.contains("hidden")) startCombat();
+      return;
+    }
+    const id = keymap[e.key];
+    if (id) { e.preventDefault(); AudioSys.init(); press(id); }
+  });
+
+  UI.startbtn.addEventListener("pointerdown", e => { e.preventDefault(); AudioSys.init(); startCombat(); });
+  UI.retrybtn.addEventListener("pointerdown", e => { e.preventDefault(); AudioSys.init(); startCombat(); });
+  UI.totitle.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    UI.results.classList.add("hidden");
+    UI.title.classList.remove("hidden");
+    S = null;
+  });
+}
+
+/* ---------------------------------------------------------------------
+   GAME FLOW / MAIN LOOP
+--------------------------------------------------------------------- */
+function startCombat() {
+  AudioSys.castStop(); AudioSys.rumbleStop();
+  S = freshState();
+  FX.reset();
+  UI.title.classList.add("hidden");
+  UI.results.classList.add("hidden");
+  UI.castbar.classList.add("hidden");
+  UI.buffrow.innerHTML = "";
+  bannerMsg("PULL!", "var(--ink)");
+  AudioSys.tone(392, .12, "square", .18);
+  AudioSys.tone(523, .2, "square", .18, null, .12);
+}
+
+let last = performance.now();
+let acc = 0;
+
+function frame(now) {
+  let dt = (now - last) / 1000;
+  last = now;
+  if (dt > 0.1) dt = 0.1;
+
+  if (S && S.mode === "combat" && !S.over) {
+    acc += dt;
+    while (acc >= CONFIG.TICK) { step(CONFIG.TICK); acc -= CONFIG.TICK; if (!S || S.over) { acc = 0; break; } }
+  }
+
+  drawScene(dt, now);
+  if (S) updateDOM(dt);
+  requestAnimationFrame(frame);
+}
+
+document.addEventListener("visibilitychange", () => { last = performance.now(); });
+
+buildBar();
+bindInput();
+resize();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
