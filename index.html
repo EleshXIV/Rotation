@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0c0913">
-<title>ROTATION v0.2.0</title>
+<title>ROTATION v0.5.0</title>
 <style>
 :root{
   --bg:#0c0913; --panel:#161022; --panel2:#1d1530; --line:#2c2144;
   --ink:#ece6f8; --dim:#8f85a8; --faint:#5c5375;
   --ess:#a06bff; --ess2:#6d3df0; --gold:#ffb63d; --gold2:#ffd98a;
-  --red:#ff4a4a; --ember:#ff7a3d; --green:#57e389; --steel:#7f8ba3;
+  --red:#ff4a4a; --ember:#ff7a3d; --green:#57e389; --steel:#7f8ba3; --storm:#3ddbd9;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg);overflow:hidden}
@@ -94,6 +94,8 @@ body{
 #ult.ready{filter:drop-shadow(0 0 14px rgba(255,182,61,.85));animation:ultpulse .9s ease-in-out infinite}
 #ult.ready #ultinner{color:var(--gold2);border-color:var(--gold);background:radial-gradient(circle at 50% 38%, #4a3312, #1c1206 72%)}
 @keyframes ultpulse{50%{transform:scale(1.05)}}
+#ult.shelled{filter:brightness(.45) saturate(.2);animation:none}
+#ult.shelled #ultinner{color:var(--steel)}
 
 /* ---------- essence ---------- */
 #essrow{padding:0 12px 7px}
@@ -102,7 +104,9 @@ body{
 #esstext{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;letter-spacing:.16em;text-shadow:0 1px 2px #000}
 
 /* ---------- action bar ---------- */
-#bar{display:flex;justify-content:center;gap:7px;padding:0 8px 12px}
+#bar{display:flex;justify-content:center;gap:7px;padding:0 8px 10px}
+.abwrap{display:flex;flex-direction:column;align-items:center;gap:3px}
+.abname{font-size:6.8px;font-weight:800;letter-spacing:.13em;color:var(--dim);pointer-events:none}
 .ab{
   width:56px;height:56px;border:none;position:relative;cursor:pointer;
   background:linear-gradient(160deg,#251b3e,#151024);
@@ -119,6 +123,7 @@ body{
 .ab.dim{filter:brightness(.42) saturate(.5)}
 .ab.proc{filter:drop-shadow(0 0 10px rgba(255,182,61,.9));color:var(--gold2);background:linear-gradient(160deg,#4a3312,#1c1206)}
 .ab.kick{filter:drop-shadow(0 0 10px rgba(255,74,74,.9));color:#ffb0a0;background:linear-gradient(160deg,#4a1812,#1c0806);animation:pulse .5s ease-in-out infinite}
+.ab.shelled{filter:brightness(.4) saturate(.15);color:var(--steel)}
 .ab.deny{animation:deny .18s}
 @keyframes deny{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
 
@@ -131,6 +136,13 @@ body{
 }
 #gametitle{font-size:38px;font-weight:900;letter-spacing:.42em;text-indent:.42em;color:var(--ink);text-shadow:0 0 26px rgba(160,107,255,.65)}
 #tagline{margin-top:8px;font-size:12px;letter-spacing:.14em;color:var(--dim)}
+#classrow{display:flex;gap:8px;margin-top:20px}
+.clsbtn{background:#0a0710;border:1px solid var(--line);color:var(--faint);font-size:9.5px;font-weight:900;letter-spacing:.14em;padding:11px 14px;cursor:pointer;border-radius:7px}
+.clsbtn[data-cls="mage"].sel{color:var(--ess);border-color:var(--ess);background:rgba(160,107,255,.1)}
+.clsbtn[data-cls="storm"].sel{color:var(--storm);border-color:var(--storm);background:rgba(61,219,217,.1)}
+body.storm #essfill{background:linear-gradient(90deg,#1d7f8c,var(--storm))}
+body.storm #ult.ready{filter:drop-shadow(0 0 14px rgba(61,219,217,.85))}
+body.storm #ult.ready #ultinner{color:#bff7f5;border-color:var(--storm);background:radial-gradient(circle at 50% 38%, #103c3f, #061c1e 72%)}
 .bigbtn{
   margin-top:26px;padding:15px 44px;font-size:14px;font-weight:900;letter-spacing:.26em;text-indent:.26em;
   color:var(--ink);background:linear-gradient(160deg,#3a2a66,#221741);
@@ -160,6 +172,28 @@ body{
 #best{margin-top:10px;font-size:10px;letter-spacing:.12em;color:var(--faint)}
 #totitle{margin-top:12px;background:none;border:none;color:var(--faint);font-size:10px;letter-spacing:.2em;cursor:pointer;text-decoration:underline}
 
+/* options */
+.subbtn{margin-top:12px;background:none;border:1px solid var(--line);color:var(--dim);font-size:10px;font-weight:800;letter-spacing:.24em;text-indent:.24em;padding:10px 26px;cursor:pointer;border-radius:6px}
+#tutbtn{border-color:var(--ess2);color:var(--ess)}
+#tutpanel{position:absolute;left:8px;right:8px;bottom:8px;background:rgba(13,9,22,.93);border:1px solid var(--line);border-radius:10px;padding:9px 11px;z-index:5}
+#tutrow{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+#tutname{font-size:9.5px;font-weight:900;letter-spacing:.2em;color:var(--gold)}
+#tutexit{background:none;border:1px solid var(--line);color:var(--dim);font-size:8.5px;font-weight:800;letter-spacing:.16em;padding:4px 10px;border-radius:5px;cursor:pointer}
+#tuttext{font-size:11px;line-height:1.45;color:var(--ink)}
+#options{z-index:30}
+#opthead{font-size:16px;font-weight:900;letter-spacing:.3em;text-indent:.3em;margin-bottom:18px}
+.optsec{width:100%;max-width:360px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:12px;text-align:left}
+.optsec h3{font-size:9.5px;font-weight:800;letter-spacing:.22em;color:var(--ember);margin-bottom:8px}
+.optrow{display:flex;justify-content:space-between;align-items:center;padding:5px 0;gap:10px}
+.optrow .ol{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--ink)}
+.tgl{min-width:64px;padding:7px 0;text-align:center;font-size:10px;font-weight:900;letter-spacing:.12em;border-radius:6px;border:1px solid var(--line);background:#0a0710;color:var(--dim);cursor:pointer}
+.tgl.on{color:var(--green);border-color:var(--green)}
+#vol{flex:1;accent-color:var(--ess);max-width:150px}
+.keybtn{min-width:72px;padding:7px 8px;text-align:center;font-size:10px;font-weight:900;letter-spacing:.1em;border-radius:6px;border:1px solid var(--line);background:#0a0710;color:var(--ink);cursor:pointer}
+.keybtn.listen{color:var(--gold);border-color:var(--gold);animation:pulse .7s ease-in-out infinite}
+#optactions{display:flex;gap:10px;margin-top:4px}
+#optactions button{background:none;border:1px solid var(--line);color:var(--dim);font-size:9.5px;font-weight:800;letter-spacing:.18em;padding:9px 18px;cursor:pointer;border-radius:6px}
+
 @media (max-height:640px){
   #ult{width:70px;height:70px}
   .ab{width:50px;height:50px}
@@ -178,7 +212,7 @@ body{
       <div id="bossrow1"><span id="bossname">KAROTH, THE CINDER TYRANT</span><span id="enrage">4:00</span></div>
       <div id="bosshpbar"><div id="bosshpfill"></div><span id="bosshptext">100%</span></div>
       <div id="bossrow3">
-        <span id="rendtag">REND <span id="rendbar"><b></b></span></span>
+        <span id="rendtag"><span id="dotlabel">REND</span> <span id="rendbar"><b></b></span></span>
         <span id="dpslive"></span>
       </div>
       <div id="castbar" class="hidden"><div id="castfill"></div><span id="castname">OBLITERATE</span></div>
@@ -188,6 +222,10 @@ body{
   <div id="scenewrap">
     <canvas id="scene"></canvas>
     <div id="banner"></div>
+    <div id="tutpanel" class="hidden">
+      <div id="tutrow"><span id="tutname"></span><button id="tutexit">EXIT</button></div>
+      <div id="tuttext"></div>
+    </div>
   </div>
 
   <div id="playerstrip">
@@ -214,24 +252,34 @@ body{
   <div id="title" class="overlay">
     <div id="gametitle">ROTATION</div>
     <div id="tagline">ONE BOSS &middot; SEVEN BUTTONS &middot; YOUR PARSE</div>
+    <div id="classrow">
+      <button class="clsbtn sel" data-cls="mage">DARK<br>BATTLEMAGE</button>
+      <button class="clsbtn" data-cls="storm">TEMPEST<br>ADEPT</button>
+    </div>
     <button class="bigbtn" id="startbtn">ENTER COMBAT</button>
+    <button class="subbtn" id="tutbtn">TUTORIAL</button>
+    <button class="subbtn" id="optbtn">OPTIONS</button>
     <details id="howto">
       <summary>HOW TO PLAY</summary>
-      <span class="h">YOUR KIT</span>
+      <span class="h">DARK BATTLEMAGE</span>
       <b>Strike</b> builds 15 Essence and can proc <b>Overflow</b>.
       <b>Rend</b> (20) applies a 12s bleed &mdash; keep it rolling.
       <b>Ruin</b> (40) is your big spender.
       <b>Riposte</b> is free and huge, but only while Overflow glows &mdash; 8s to use it.
       <b>Onslaught</b> (45s CD) doubles Essence gain for 10s.
-      <b>Interrupt</b> has no cooldown &mdash; but kick empty air and it locks for 20s. <b>Cataclysm</b> charges from damage &mdash; quality damage charges faster.
+      <b>Interrupt</b> has no cooldown &mdash; but kick empty air and it locks for 6s. <b>Cataclysm</b> charges from damage &mdash; quality damage charges faster.
+      <span class="h">TEMPEST ADEPT</span>
+      <b>Jolt</b> builds 15 Static. <b>Conduit</b> (10) is a bleed whose ticks can refresh <b>Stormlance</b> &mdash; a hard hitter with 2 charges. <b>Overcharge</b> (free, 20s CD) empowers your next two Jolts by 150%. <b>Maelstrom</b> dumps 30&ndash;60 Static &mdash; bigger dumps hit harder per point. Ultimate <b>Tempest</b>: 30% faster globals for 30 seconds.
       <span class="h">THE FIGHT</span>
       <b>Exposed:</b> boss takes +50% &mdash; burn everything.
-      <b>Carapace:</b> direct hits bounce for zero &mdash; hold, pool, let Rend tick.
+      <b>Carapace:</b> direct hits bounce for zero &mdash; but Rend slips through the shell. Pool Essence, keep the bleed rolling, touch nothing else.
       <b>Casts:</b> interrupt or be Sundered. Miss two and you die. Enrage at 4:00 kills you.
       <span class="h">SCORING</span>
       Your parse is graded after the fight. The autopsy tells you exactly what to fix.
+      <span class="h">KEYBOARD</span>
+      Keys are shown on the buttons. Rebind them in Options.
     </details>
-    <div id="version">ROTATION v0.2.0</div>
+    <div id="version">ROTATION v0.5.0</div>
   </div>
 
   <div id="results" class="overlay hidden">
@@ -246,11 +294,28 @@ body{
     <button id="totitle">BACK TO TITLE</button>
   </div>
 
+  <div id="options" class="overlay hidden">
+    <div id="opthead">OPTIONS</div>
+    <div class="optsec">
+      <h3>SOUND</h3>
+      <div class="optrow"><span class="ol">Sound effects</span><button class="tgl" id="sndtgl">ON</button></div>
+      <div class="optrow"><span class="ol">Volume</span><input type="range" id="vol" min="0" max="100" value="100"></div>
+    </div>
+    <div class="optsec">
+      <h3>HOTKEYS &mdash; TAP A KEY, THEN PRESS THE NEW ONE</h3>
+      <div id="keylist"></div>
+    </div>
+    <div id="optactions">
+      <button id="keyreset">RESET DEFAULTS</button>
+      <button id="optback">BACK</button>
+    </div>
+  </div>
+
 </div>
 <script>
 "use strict";
 /* =====================================================================
-   ROTATION v0.2.0 — single-file MMO rotation score-attack
+   ROTATION v0.5.0 — single-file MMO rotation score-attack
    All tuning lives in CONFIG. Fixed-timestep sim, rAF render.
    ===================================================================== */
 
@@ -268,8 +333,16 @@ const CONFIG = {
     ruin:      { cost: 40, dmg: 2200 },
     riposte:   { dmg: 2800, window: 8 },
     onslaught: { cd: 45, duration: 10, genMult: 2 },
-    interrupt: { cd: 20 },  // no CD on a clean kick; this is the WHIFF lockout
+    interrupt: { cd: 6 },  // no CD on a clean kick; this is the WHIFF lockout
     cataclysm: { dmg: 6500, chargeMax: 150000 }
+  },
+  STORM: {
+    jolt:      { dmg: 480, gen: 15 },
+    conduit:   { cost: 10, duration: 12, tickEvery: 2, tickDmg: 340, procChance: 0.15 },
+    lance:     { dmg: 1600, charges: 2, recharge: 15 },
+    overcharge:{ cd: 20, stacks: 2, mult: 2.5, duration: 15 },
+    maelstrom: { min: 30, max: 60, base: 20, scale: 0.6 },  // dmg = spent * (base + scale*spent)
+    tempest:   { duration: 30, haste: 0.7, chargeMax: 150000 }
   },
   CHARGE: { exposedMult: 1.5, riposteMult: 1.5, critMult: 1.35 },
   BOSS: {
@@ -331,18 +404,68 @@ const CONFIG = {
 const REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* ---------------------------------------------------------------------
+   SETTINGS — persisted where storage is available (e.g. GitHub Pages);
+   degrades gracefully to session-only elsewhere
+--------------------------------------------------------------------- */
+const DEFAULT_KEYS = { s1: "1", s2: "2", s3: "3", s4: "4", s5: "5", s6: "6", ult: "r" };
+const SETTINGS = { sound: true, vol: 1, cls: "mage", keys: Object.assign({}, DEFAULT_KEYS) };
+function loadSettings() {
+  try {
+    const raw = window.localStorage.getItem("rotation-settings");
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    if (typeof s.sound === "boolean") SETTINGS.sound = s.sound;
+    if (typeof s.vol === "number") SETTINGS.vol = Math.max(0, Math.min(1, s.vol));
+    if (s.cls === "storm" || s.cls === "mage") SETTINGS.cls = s.cls;
+    if (s.keys) for (const k in DEFAULT_KEYS) if (typeof s.keys[k] === "string") SETTINGS.keys[k] = s.keys[k];
+  } catch (e) {}
+}
+function saveSettings() {
+  try { window.localStorage.setItem("rotation-settings", JSON.stringify(SETTINGS)); } catch (e) {}
+}
+function keyDisplay(k) {
+  if (k === " ") return "SPC";
+  if (k.length === 1) return k.toUpperCase();
+  return k.replace("Arrow", "").toUpperCase().slice(0, 6);
+}
+
+/* ---------------------------------------------------------------------
    AUDIO — synthesized, no assets
 --------------------------------------------------------------------- */
 const AudioSys = {
-  ctx: null, master: null, castOsc: null, castGain: null, rumble: null,
+  ctx: null, master: null, castOsc: null, castGain: null, rumble: null, silent: null,
   init() {
+    this.unlockRoute(); // iOS: silent media element flips the session to "playback" so the mute switch stops silencing us
     if (this.ctx) { if (this.ctx.state === "suspended") this.ctx.resume(); return; }
     const C = window.AudioContext || window.webkitAudioContext;
     if (!C) return;
     this.ctx = new C();
     this.master = this.ctx.createGain();
-    this.master.gain.value = 0.4;
     this.master.connect(this.ctx.destination);
+    this.applyVolume();
+  },
+  unlockRoute() {
+    if (!SETTINGS.sound) return;
+    try {
+      if (!this.silent) {
+        const a = document.createElement("audio");
+        a.setAttribute("playsinline", "");
+        a.loop = true;
+        a.src = "data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==";
+        this.silent = a;
+      }
+      const p = this.silent.play();
+      if (p && p.catch) p.catch(() => {});
+    } catch (e) {}
+  },
+  applyVolume() {
+    if (this.master) this.master.gain.value = SETTINGS.sound ? 0.4 * SETTINGS.vol : 0;
+    if (this.silent) {
+      try {
+        if (SETTINGS.sound) { const p = this.silent.play(); if (p && p.catch) p.catch(() => {}); }
+        else this.silent.pause();
+      } catch (e) {}
+    }
   },
   tone(f, dur, type, vol, slide, delay) {
     if (!this.ctx) return;
@@ -429,9 +552,10 @@ function vibrate(p) { if (navigator.vibrate) { try { navigator.vibrate(p); } cat
 let S = null;
 let best = { dps: 0, grade: "-" };
 
-function freshState() {
+function freshState(cls) {
   return {
-    mode: "combat", t: 0, over: false, dead: false, victory: false,
+    cls: cls === "storm" ? "storm" : "mage",
+    mode: "combat", pulled: false, t: 0, over: false, dead: false, victory: false,
     cause: "", killTime: 0,
     essence: 0, gcd: 0,
     bossHp: CONFIG.BOSS.hp, bossMax: CONFIG.BOSS.hp,
@@ -439,7 +563,12 @@ function freshState() {
     overflow: false, overflowLeft: 0,
     onslaughtLeft: 0, onslaughtCd: 0,
     interruptCd: 0, kickGrace: 0,
+    tutorial: false, tutIdx: 0, tutWait: 0, tutFlags: {},
+    tutStrikes: 0, tutStrikeBase: 0, tutIntBase: 0, tutCaraBase: 0, tutExpBase: 0, tutRecast: 0,
     charge: 0, ultWasFull: false,
+    lanceCharges: CONFIG.STORM.lance.charges, lanceRecharge: 0, lanceFlash: 0,
+    overchargeLeft: 0, overchargeStacks: 0, overchargeCd: 0, tempestLeft: 0,
+    gcdDur: CONFIG.GCD, tutLances: 0, tutBuffedJolts: 0, tutProcBase: 0, tutT: 0,
     cast: null,
     exposedLeft: 0, carapaceLeft: 0,
     sundered: 0, playerHp: 100,
@@ -488,6 +617,15 @@ function projectile(color, size, fromTop) {
 /* ---------------------------------------------------------------------
    COMBAT CORE
 --------------------------------------------------------------------- */
+function ultMax() {
+  return S && S.cls === "storm" ? CONFIG.STORM.tempest.chargeMax : CONFIG.ABIL.cataclysm.chargeMax;
+}
+
+function triggerGcd() {
+  S.gcdDur = CONFIG.GCD * (S.cls === "storm" && S.tempestLeft > 0 ? CONFIG.STORM.tempest.haste : 1);
+  S.gcd = S.gcdDur;
+}
+
 function gainEssence(base) {
   const mult = S.onslaughtLeft > 0 ? CONFIG.ABIL.onslaught.genMult : 1;
   const gain = base * mult;
@@ -497,7 +635,7 @@ function gainEssence(base) {
 }
 
 function addCharge(q) {
-  const max = CONFIG.ABIL.cataclysm.chargeMax;
+  const max = ultMax();
   if (S.charge >= max) { S.stats.chargeWasted += q; return; }
   S.charge += q;
   if (S.charge >= max) {
@@ -526,16 +664,18 @@ function dealDamage(base, kind) {
 
   S.bossHp -= dmg;
   S.stats.totalDmg += dmg;
+  if (S.tutorial) S.tutFlags[kind] = true;
   if (exposed) S.stats.exposedDmg += dmg;
 
   let q = dmg;
   if (exposed) q *= CONFIG.CHARGE.exposedMult;
-  if (kind === "riposte") q *= CONFIG.CHARGE.riposteMult;
+  if (kind === "riposte" || kind === "lance") q *= CONFIG.CHARGE.riposteMult;
   if (crit) q *= CONFIG.CHARGE.critMult;
   addCharge(q);
 
-  const colors = { strike: "#efe9fb", rend: "#ff8d7a", ruin: "#c9a6ff", riposte: "#ffd98a", cataclysm: "#ff9a5a" };
-  const sizes  = { strike: 14, rend: 12, ruin: 19, riposte: 20, cataclysm: 26 };
+  const colors = { strike: "#efe9fb", rend: "#ff8d7a", ruin: "#c9a6ff", riposte: "#ffd98a", cataclysm: "#ff9a5a",
+                   jolt: "#e6fbfa", lance: "#7de8e6", maelstrom: "#3db8ff" };
+  const sizes  = { strike: 14, rend: 12, ruin: 19, riposte: 20, cataclysm: 26, jolt: 14, lance: 19, maelstrom: 21 };
   floatNum(dmg.toLocaleString(), {
     color: crit ? "#ffe24a" : colors[kind], size: crit ? sizes[kind] * 1.45 : sizes[kind], crit
   });
@@ -546,7 +686,38 @@ function dealDamage(base, kind) {
   return true;
 }
 
+function grantLanceRefresh() {
+  if (S.lanceCharges < CONFIG.STORM.lance.charges) {
+    S.lanceCharges++;
+    S.stats.procsGained++;
+    S.stats.procsUsed++;
+    S.lanceFlash = 0.8;
+    sfx.proc();
+    floatNum("LANCE +1", { color: "#7de8e6", size: 12 });
+  } else {
+    S.stats.procsExpired++;
+    floatNum("PROC WASTED", { color: "#8f85a8", size: 11 });
+  }
+}
+
 function grantOverflow() {
+  if (S.cls === "storm") {
+    if (S.lanceCharges < CONFIG.STORM.lance.charges) {
+      S.lanceRecharge -= dt;
+      if (S.lanceRecharge <= 0) {
+        S.lanceCharges++;
+        if (S.lanceCharges < CONFIG.STORM.lance.charges) S.lanceRecharge = CONFIG.STORM.lance.recharge;
+      }
+    }
+    if (S.overchargeCd > 0) S.overchargeCd = Math.max(0, S.overchargeCd - dt);
+    if (S.overchargeLeft > 0) {
+      S.overchargeLeft = Math.max(0, S.overchargeLeft - dt);
+      if (S.overchargeLeft <= 0) S.overchargeStacks = 0;
+    }
+    if (S.tempestLeft > 0) S.tempestLeft = Math.max(0, S.tempestLeft - dt);
+    if (S.lanceFlash > 0) S.lanceFlash = Math.max(0, S.lanceFlash - dt);
+  }
+
   if (S.overflow) { S.overflowLeft = CONFIG.ABIL.riposte.window; return; }
   S.overflow = true;
   S.overflowLeft = CONFIG.ABIL.riposte.window;
@@ -562,9 +733,90 @@ function denyBtn(id) {
   if (el) { el.classList.remove("deny"); void el.offsetWidth; el.classList.add("deny"); }
 }
 
+function pressStorm(id) {
+  const C = CONFIG.STORM;
+  if (id === "jolt") {
+    triggerGcd();
+    FX.attack = 0.18;
+    projectile("#3ddbd9", 4);
+    sfx.strike();
+    let dmg = C.jolt.dmg;
+    if (S.overchargeStacks > 0) {
+      dmg *= C.overcharge.mult;
+      S.overchargeStacks--;
+      if (S.tutorial) S.tutBuffedJolts++;
+      if (S.overchargeStacks <= 0) S.overchargeLeft = 0;
+    }
+    const hit = dealDamage(dmg, "jolt");
+    if (hit) {
+      if (S.tutorial) S.tutStrikes++;
+      gainEssence(C.jolt.gen);
+    }
+    return;
+  }
+  if (id === "conduit") {
+    if (S.essence < C.conduit.cost) { denyBtn(id); return; }
+    S.essence -= C.conduit.cost;
+    triggerGcd();
+    FX.attack = 0.18;
+    projectile("#7de8e6", 5);
+    sfx.rend();
+    const fresh = S.rendLeft <= 0;
+    S.rendLeft = C.conduit.duration;
+    if (fresh) S.rendTick = C.conduit.tickEvery;
+    return;
+  }
+  if (id === "lance") {
+    if (S.lanceCharges <= 0) { denyBtn(id); return; }
+    if (S.lanceCharges === C.lance.charges) S.lanceRecharge = C.lance.recharge;
+    S.lanceCharges--;
+    if (S.tutorial) S.tutLances++;
+    triggerGcd();
+    FX.attack = 0.22;
+    projectile("#bff7f5", 7);
+    sfx.riposte();
+    addShake(6);
+    vibrate(15);
+    dealDamage(C.lance.dmg, "lance");
+    return;
+  }
+  if (id === "maelstrom") {
+    if (S.essence < C.maelstrom.min) { denyBtn(id); return; }
+    const spent = Math.min(S.essence, C.maelstrom.max);
+    S.essence -= spent;
+    triggerGcd();
+    FX.attack = 0.24;
+    projectile("#3db8ff", 8);
+    sfx.ruin();
+    addShake(8);
+    vibrate(18);
+    if (S.tutorial && spent >= 55) S.tutFlags.bigMael = true;
+    dealDamage(Math.round(spent * (C.maelstrom.base + C.maelstrom.scale * spent)), "maelstrom");
+    return;
+  }
+}
+
 function press(id) {
   if (!S || S.mode !== "combat" || S.over) return;
   const A = CONFIG.ABIL;
+
+  if (!S.pulled) {
+    if (id === "interrupt" || id === "ult") { denyBtn(id); return; }
+    if (S.cls === "mage") {
+      if (id === "rend" && S.essence < A.rend.cost) { denyBtn(id); return; }
+      if (id === "ruin" && S.essence < A.ruin.cost) { denyBtn(id); return; }
+      if (id === "riposte" && !S.overflow) { denyBtn(id); return; }
+    } else {
+      if (id === "conduit" && S.essence < CONFIG.STORM.conduit.cost) { denyBtn(id); return; }
+      if (id === "maelstrom" && S.essence < CONFIG.STORM.maelstrom.min) { denyBtn(id); return; }
+      if (id === "lance" && S.lanceCharges <= 0) { denyBtn(id); return; }
+      if (id === "overcharge" && S.overchargeCd > 0) { denyBtn(id); return; }
+    }
+    S.pulled = true;
+    bannerMsg("PULL!", "var(--ink)");
+    AudioSys.tone(392, .12, "square", .18);
+    AudioSys.tone(523, .2, "square", .18, null, .12);
+  }
 
   if (id === "interrupt") {
     if (S.interruptCd > 0) { denyBtn(id); return; }
@@ -583,17 +835,43 @@ function press(id) {
       S.interruptCd = A.interrupt.cd;  // kicked air: locked out
       sfx.deny();
       addShake(4);
-      bannerMsg("WHIFFED — KICK LOCKED 20s", "var(--red)");
+      bannerMsg("WHIFFED — KICK LOCKED " + A.interrupt.cd + "s", "var(--red)");
       denyBtn(id);
     }
     return;
   }
 
-  if (id === "cataclysm") {
-    if (S.charge < A.cataclysm.chargeMax || S.gcd > 0) { denyBtn(id); return; }
+  if (id === "overcharge") {
+    if (S.cls !== "storm") { denyBtn(id); return; }
+    const OC = CONFIG.STORM.overcharge;
+    if (S.overchargeCd > 0) { denyBtn(id); return; }
+    S.overchargeCd = OC.cd;
+    S.overchargeLeft = OC.duration;
+    S.overchargeStacks = OC.stacks;
+    sfx.proc();
+    bannerMsg("OVERCHARGED", "var(--storm)");
+    if (S.tutorial) S.tutFlags.overcharge = true;
+    return;
+  }
+
+  if (id === "ult") {
+    if (S.charge < ultMax()) { denyBtn(id); return; }
+    if (S.cls === "storm") {
+      S.charge = 0; S.ultWasFull = false;
+      AudioSys.rumbleStop();
+      S.tempestLeft = CONFIG.STORM.tempest.duration;
+      sfx.onslaught();
+      bannerMsg("TEMPEST — 30% FASTER", "var(--storm)");
+      addFlash(0.2, "61,219,217");
+      vibrate([20, 30, 40]);
+      if (S.tutorial) S.tutFlags.ult = true;
+      return;
+    }
+    if (S.gcd > 0) { denyBtn(id); return; }
     S.charge = 0; S.ultWasFull = false;
     AudioSys.rumbleStop();
-    S.gcd = CONFIG.GCD;
+    if (S.tutorial) S.tutFlags.ult = true;
+    triggerGcd();
     FX.attack = 0.25;
     projectile("#ff9a5a", 9, true);
     sfx.cataclysm();
@@ -610,13 +888,16 @@ function press(id) {
 
   if (S.gcd > 0) return;
 
+  if (S.cls === "storm") { pressStorm(id); return; }
+
   if (id === "strike") {
-    S.gcd = CONFIG.GCD;
+    triggerGcd();
     FX.attack = 0.18;
     projectile("#b78bff", 4);
     sfx.strike();
     const hit = dealDamage(A.strike.dmg, "strike");
     if (hit) {
+      if (S.tutorial) S.tutStrikes++;
       gainEssence(A.strike.gen);
       if (Math.random() < A.strike.procChance) grantOverflow();
     }
@@ -626,7 +907,7 @@ function press(id) {
   if (id === "rend") {
     if (S.essence < A.rend.cost) { denyBtn(id); return; }
     S.essence -= A.rend.cost;
-    S.gcd = CONFIG.GCD;
+    triggerGcd();
     FX.attack = 0.18;
     projectile("#ff6a4a", 5);
     sfx.rend();
@@ -639,7 +920,7 @@ function press(id) {
   if (id === "ruin") {
     if (S.essence < A.ruin.cost) { denyBtn(id); return; }
     S.essence -= A.ruin.cost;
-    S.gcd = CONFIG.GCD;
+    triggerGcd();
     FX.attack = 0.22;
     projectile("#c9a6ff", 7);
     sfx.ruin();
@@ -653,7 +934,7 @@ function press(id) {
     if (!S.overflow) { denyBtn(id); return; }
     S.overflow = false; S.overflowLeft = 0;
     S.stats.procsUsed++;
-    S.gcd = CONFIG.GCD;
+    triggerGcd();
     FX.attack = 0.22;
     projectile("#ffd98a", 7);
     sfx.riposte();
@@ -667,7 +948,7 @@ function press(id) {
     if (S.onslaughtCd > 0) { denyBtn(id); return; }
     S.onslaughtCd = A.onslaught.cd;
     S.onslaughtLeft = A.onslaught.duration;
-    S.gcd = CONFIG.GCD;
+    triggerGcd();
     sfx.onslaught();
     bannerMsg("ONSLAUGHT", "var(--ess)");
     addFlash(0.15, "160,107,255");
@@ -691,6 +972,11 @@ function castCompleted() {
   S.cast = null;
   AudioSys.castStop();
   UI.castbar.classList.add("hidden");
+  if (S.tutorial) {
+    bannerMsg("IT GOT THROUGH — IN A REAL FIGHT THAT SUNDERS YOU", "var(--red)");
+    S.tutRecast = 2.2;
+    return;
+  }
   if (wasAnnihilation) { die("Annihilated at enrage."); return; }
   S.stats.intMissed++;
   sfx.hitTaken();
@@ -717,7 +1003,7 @@ function stepBossScript() {
 }
 
 function step(dt) {
-  if (S.over) return;
+  if (S.over || !S.pulled) return;
   S.t += dt;
 
   if (S.gcd > 0) S.gcd = Math.max(0, S.gcd - dt);
@@ -727,6 +1013,23 @@ function step(dt) {
   if (S.onslaughtLeft > 0) S.onslaughtLeft = Math.max(0, S.onslaughtLeft - dt);
   if (S.exposedLeft > 0) S.exposedLeft = Math.max(0, S.exposedLeft - dt);
   if (S.carapaceLeft > 0) S.carapaceLeft = Math.max(0, S.carapaceLeft - dt);
+
+  if (S.cls === "storm") {
+    if (S.lanceCharges < CONFIG.STORM.lance.charges) {
+      S.lanceRecharge -= dt;
+      if (S.lanceRecharge <= 0) {
+        S.lanceCharges++;
+        if (S.lanceCharges < CONFIG.STORM.lance.charges) S.lanceRecharge = CONFIG.STORM.lance.recharge;
+      }
+    }
+    if (S.overchargeCd > 0) S.overchargeCd = Math.max(0, S.overchargeCd - dt);
+    if (S.overchargeLeft > 0) {
+      S.overchargeLeft = Math.max(0, S.overchargeLeft - dt);
+      if (S.overchargeLeft <= 0) S.overchargeStacks = 0;
+    }
+    if (S.tempestLeft > 0) S.tempestLeft = Math.max(0, S.tempestLeft - dt);
+    if (S.lanceFlash > 0) S.lanceFlash = Math.max(0, S.lanceFlash - dt);
+  }
 
   if (S.overflow) {
     S.overflowLeft -= dt;
@@ -738,9 +1041,16 @@ function step(dt) {
     S.rendLeft -= dt;
     S.rendTick -= dt;
     if (S.rendTick <= 0) {
-      S.rendTick += CONFIG.ABIL.rend.tickEvery;
-      dealDamage(CONFIG.ABIL.rend.tickDmg, "rend");
-      if (S.over) return;
+      if (S.cls === "storm") {
+        S.rendTick += CONFIG.STORM.conduit.tickEvery;
+        dealDamage(CONFIG.STORM.conduit.tickDmg, "rend");
+        if (S.over) return;
+        if (Math.random() < CONFIG.STORM.conduit.procChance) grantLanceRefresh();
+      } else {
+        S.rendTick += CONFIG.ABIL.rend.tickEvery;
+        dealDamage(CONFIG.ABIL.rend.tickDmg, "rend");
+        if (S.over) return;
+      }
     }
     if (S.rendLeft <= 0) { S.rendLeft = 0; }
   }
@@ -749,6 +1059,8 @@ function step(dt) {
     S.cast.left -= dt;
     if (S.cast.left <= 0) { castCompleted(); if (S.over) return; }
   }
+
+  if (S.tutorial) { tutStep(dt); return; }
 
   stepBossScript();
 
@@ -786,6 +1098,170 @@ function die(cause) {
 }
 
 /* ---------------------------------------------------------------------
+   TUTORIAL
+--------------------------------------------------------------------- */
+function lInterrupt() {
+  return {
+    name: "INTERRUPT",
+    text: "The boss is casting. Press INTERRUPT while the cast bar is up. Careful — kicking empty air locks the button for 6 seconds.",
+    enter: () => { S.tutIntBase = S.stats.intHit; S.tutRecast = 0.8; },
+    tick: (dt) => { if (!S.cast) { S.tutRecast -= dt; if (S.tutRecast <= 0) startCast("OBLITERATE", 3, false); } },
+    check: () => S.stats.intHit > S.tutIntBase
+  };
+}
+function lCarapace(dotName) {
+  return {
+    name: "CARAPACE",
+    text: "CARAPACE: the steel shell bounces every direct hit — grey buttons mean HOLD. Only " + dotName + " slips through. Wait out the shell without touching it.",
+    enter: () => { S.carapaceLeft = 9; S.tutCaraBase = S.stats.carapaceHits; },
+    tick: () => {
+      if (S.stats.carapaceHits > S.tutCaraBase) {
+        bannerMsg("BOUNCED — GREY MEANS HOLD", "var(--red)");
+        S.carapaceLeft = 9;
+        S.tutCaraBase = S.stats.carapaceHits;
+      }
+    },
+    check: () => S.carapaceLeft <= 0 && S.stats.carapaceHits === S.tutCaraBase
+  };
+}
+function lExposed() {
+  return {
+    name: "EXPOSED",
+    text: "EXPOSED: the core cracks open and the boss takes +50% damage. Burn windows are where parses are made — deal 6,000 damage.",
+    enter: () => { S.exposedLeft = 15; S.tutExpBase = S.stats.exposedDmg; },
+    tick: () => { if (S.exposedLeft <= 0 && S.stats.exposedDmg - S.tutExpBase < 6000) S.exposedLeft = 15; },
+    check: () => S.stats.exposedDmg - S.tutExpBase >= 6000
+  };
+}
+function lComplete(extra) {
+  return {
+    name: "COMPLETE",
+    text: "That is the whole kit. " + extra + " The real fight is a fixed 4-minute script — 31 casts, shells, burn windows, and an enrage. Learn the timeline, perfect the parse. Tap EXIT, then ENTER COMBAT.",
+    check: () => false
+  };
+}
+
+const TUT_BY_CLASS = {
+  mage: [
+    { name: "STRIKE",
+      text: "STRIKE is your filler — every press builds 15 Essence and it can trigger procs. Build the meter to 45.",
+      check: () => S.essence >= 45 },
+    { name: "REND",
+      text: "REND spends 20 Essence for a 12-second bleed on the boss. Apply it — in the real fight it should never fall off.",
+      check: () => S.rendLeft > 0 },
+    { name: "RUIN",
+      text: "RUIN is your heavy spender: 40 Essence, big hit. Bank up with Strike, then drop one.",
+      check: () => !!S.tutFlags.ruin },
+    { name: "RIPOSTE",
+      text: "Keep Striking until OVERFLOW ignites. When RIPOSTE glows gold, press it — free, huge, and you have 8 seconds before the proc is wasted.",
+      enter: () => { S.tutStrikeBase = S.tutStrikes; },
+      tick: () => { if (!S.overflow && S.stats.procsUsed === 0 && S.tutStrikes - S.tutStrikeBase >= 3) grantOverflow(); },
+      check: () => S.stats.procsUsed >= 1 },
+    { name: "ONSLAUGHT",
+      text: "ONSLAUGHT doubles your Essence gain for 10 seconds. Pop it and watch the meter surge while you Strike.",
+      check: () => S.onslaughtLeft > 0 },
+    lInterrupt(),
+    lCarapace("Rend"),
+    lExposed(),
+    { name: "CATACLYSM",
+      text: "CATACLYSM charges from damage you deal — quality hits charge it faster. The bar is full. Unleash it.",
+      enter: () => { S.charge = ultMax(); S.ultWasFull = true; sfx.ultReady(); },
+      check: () => !!S.tutFlags.ult },
+    lComplete("")
+  ],
+  storm: [
+    { name: "JOLT",
+      text: "JOLT is your filler — every press builds 15 Static. Build the meter to 45.",
+      check: () => S.essence >= 45 },
+    { name: "CONDUIT",
+      text: "CONDUIT spends 10 Static for a 12-second arc that ticks on the boss. Apply it — it should never fall off.",
+      check: () => S.rendLeft > 0 },
+    { name: "STORMLANCE",
+      text: "STORMLANCE hits hard and holds 2 charges (15s each to recharge). Fire both.",
+      check: () => S.tutLances >= 2 },
+    { name: "REFRESH",
+      text: "Conduit ticks can refresh a Stormlance charge — but only if you have room. Keep Conduit ticking with a charge spent, and watch for the flash.",
+      enter: () => { S.tutProcBase = S.stats.procsGained; },
+      tick: () => {
+        if (S.tutT > 10 && S.rendLeft > 0 && S.lanceCharges < CONFIG.STORM.lance.charges && S.stats.procsGained === S.tutProcBase) grantLanceRefresh();
+      },
+      check: () => S.stats.procsGained > S.tutProcBase },
+    { name: "OVERCHARGE",
+      text: "OVERCHARGE is free, off the global cooldown, and makes your next two Jolts hit 150% harder. Pop it, then Jolt twice.",
+      check: () => S.tutBuffedJolts >= 2 },
+    { name: "MAELSTROM",
+      text: "MAELSTROM dumps everything between 30 and 60 Static — and bigger dumps hit harder per point. Pool to 60, then unleash it.",
+      check: () => !!S.tutFlags.bigMael },
+    lInterrupt(),
+    lCarapace("Conduit"),
+    lExposed(),
+    { name: "TEMPEST",
+      text: "TEMPEST is your ultimate: 30% faster globals for 30 seconds, charged by the damage you deal. The bar is full. Ride the storm.",
+      enter: () => { S.charge = ultMax(); S.ultWasFull = true; sfx.ultReady(); },
+      check: () => !!S.tutFlags.ult },
+    lComplete("Tempo is your class — spend charges so refreshes have room, and dump Maelstrom big.")
+  ]
+};
+
+function tutList() { return TUT_BY_CLASS[S.cls] || TUT_BY_CLASS.mage; }
+
+function enterLesson(i) {
+  const list = tutList();
+  const L = list[i];
+  if (!L) return;
+  S.tutT = 0;
+  if (L.enter) L.enter();
+  UI.tutname.textContent = i < list.length - 1 ? (i + 1) + "/" + (list.length - 1) + " — " + L.name : L.name;
+  UI.tuttext.textContent = L.text;
+}
+
+function tutStep(dt) {
+  if (S.tutWait > 0) {
+    S.tutWait -= dt;
+    if (S.tutWait <= 0) enterLesson(S.tutIdx);
+    return;
+  }
+  const list = tutList();
+  const L = list[S.tutIdx];
+  if (!L) return;
+  S.tutT += dt;
+  if (L.tick) L.tick(dt);
+  if (L.check()) {
+    S.tutIdx++;
+    sfx.proc();
+    bannerMsg("✓", "var(--green)");
+    S.tutWait = 0.9;
+    UI.tuttext.textContent = "";
+  }
+}
+
+function startTutorial() {
+  AudioSys.castStop(); AudioSys.rumbleStop();
+  S = freshState(SETTINGS.cls);
+  S.tutorial = true;
+  S.pulled = true;
+  S.tutT = 0;
+  S.bossHp = S.bossMax = 5000000;
+  FX.reset();
+  UI.title.classList.add("hidden");
+  UI.results.classList.add("hidden");
+  UI.castbar.classList.add("hidden");
+  UI.buffrow.innerHTML = "";
+  UI.banner.classList.remove("show");
+  UI.tutpanel.classList.remove("hidden");
+  enterLesson(0);
+}
+
+function exitTutorial() {
+  AudioSys.castStop(); AudioSys.rumbleStop();
+  S = null;
+  UI.tutpanel.classList.add("hidden");
+  UI.castbar.classList.add("hidden");
+  UI.banner.classList.remove("show");
+  UI.title.classList.remove("hidden");
+}
+
+/* ---------------------------------------------------------------------
    GRADING / RESULTS
 --------------------------------------------------------------------- */
 function clamp01(v) { return Math.max(0, Math.min(1, v)); }
@@ -804,7 +1280,7 @@ function computeGrade() {
   comp.int     = intTotal > 0 ? (st.intHit / intTotal) * 100 : 100;
   comp.exposed = st.totalDmg > 0 ? Math.min(100, (st.exposedDmg / st.totalDmg) / G.exposedTarget * 100) : 0;
   comp.essW    = (1 - clamp01(st.essenceWasted / G.essenceWasteCap)) * 100;
-  const cMax = CONFIG.ABIL.cataclysm.chargeMax;
+  const cMax = ultMax();
   const cWaste = Math.max(0, st.chargeWasted - cMax * G.chargeWasteGrace);
   comp.chargeW = (1 - clamp01(cWaste / (cMax * G.chargeWasteCap))) * 100;
   comp.cara    = Math.max(0, 100 - st.carapaceHits * 20);
@@ -819,15 +1295,27 @@ function computeGrade() {
   return { dps: Math.round(dps), ft, comp, score, letter };
 }
 
-const FIX_MSG = {
-  dps:     "Push more damage. Never sit on the GCD — Strike is always better than nothing.",
-  rend:    "Rend fell off. Keep the bleed rolling for the whole fight.",
-  proc:    "Overflow procs expired. Spend Riposte the moment it lights up.",
-  int:     "Kicks failed you — a cast got through or you kicked air. Press it only when the cast bar is up.",
-  exposed: "Pool Essence and hold cooldowns for Exposed windows, then dump everything.",
-  essW:    "Essence overcapped. Spend Ruin before you hit 100.",
-  chargeW: "Cataclysm sat full too long. Fire it into an Exposed window sooner.",
-  cara:    "You hit into Carapace. When the shell is up: hands off, let Rend tick."
+const FIX_BY_CLASS = {
+  mage: {
+    dps:     "Push more damage. Never sit on the GCD — Strike is always better than nothing.",
+    rend:    "Rend fell off. Keep the bleed rolling for the whole fight.",
+    proc:    "Overflow procs expired. Spend Riposte the moment it lights up.",
+    int:     "Kicks failed you — a cast got through or you kicked air. Press it only when the cast bar is up.",
+    exposed: "Pool Essence and hold cooldowns for Exposed windows, then dump everything.",
+    essW:    "Essence overcapped. Spend Ruin before you hit 100.",
+    chargeW: "Cataclysm sat full too long. Fire it into an Exposed window sooner.",
+    cara:    "You hit into Carapace. When the shell is up: hands off, let Rend tick."
+  },
+  storm: {
+    dps:     "Push more damage. Never sit on the GCD — Jolt is always better than nothing.",
+    rend:    "Conduit fell off — no ticks means no Stormlance refreshes. Keep it rolling.",
+    proc:    "Lance refreshes wasted at max charges. Spend Stormlance so procs have room to land.",
+    int:     "Kicks failed you — a cast got through or you kicked air. Press it only when the cast bar is up.",
+    exposed: "Pool Static and hold Tempest for Exposed windows, then dump everything.",
+    essW:    "Static overcapped. Maelstrom eats up to 60 — dump before you cap.",
+    chargeW: "Tempest sat full too long. Fire it into a burn window sooner.",
+    cara:    "You hit into Carapace. When the shell is up: hands off, let Conduit tick."
+  }
 };
 
 const GRADE_COLOR = { S: "#ffd98a", A: "#a06bff", B: "#57e389", C: "#6fb2ff", D: "#ff9a5a", F: "#ff4a4a" };
@@ -863,21 +1351,24 @@ function showResults() {
 
   const rendPct = Math.round(st.rendTime / g.ft * 100);
   const expShare = st.totalDmg > 0 ? Math.round(st.exposedDmg / st.totalDmg * 100) : 0;
-  const chargePct = Math.round(st.chargeWasted / CONFIG.ABIL.cataclysm.chargeMax * 100);
+  const chargePct = Math.round(st.chargeWasted / ultMax() * 100);
+  const storm = S.cls === "storm";
 
   UI.statlist.innerHTML =
-    statRow("REND UPTIME", rendPct + "%", g.comp.rend) +
-    statRow("OVERFLOW PROCS", st.procsUsed + " used / " + st.procsExpired + " expired", g.comp.proc) +
+    statRow(storm ? "CONDUIT UPTIME" : "REND UPTIME", rendPct + "%", g.comp.rend) +
+    statRow(storm ? "LANCE REFRESHES" : "OVERFLOW PROCS",
+      storm ? st.procsGained + " gained / " + st.procsExpired + " wasted"
+            : st.procsUsed + " used / " + st.procsExpired + " expired", g.comp.proc) +
     statRow("INTERRUPTS", st.intHit + " hit / " + st.intMissed + " missed / " + st.whiffs + " whiffed", g.comp.int) +
     statRow("EXPOSED DMG SHARE", expShare + "% (target 30%+)", g.comp.exposed) +
     statRow("ESSENCE OVERCAPPED", Math.round(st.essenceWasted) + " wasted", g.comp.essW) +
-    statRow("CATACLYSM OVERCHARGE", chargePct + "% of a bar wasted", g.comp.chargeW) +
+    statRow(storm ? "TEMPEST OVERCHARGE" : "CATACLYSM OVERCHARGE", chargePct + "% of a bar wasted", g.comp.chargeW) +
     statRow("HITS INTO CARAPACE", String(st.carapaceHits), g.comp.cara) +
     statRow("CRITS", String(st.crits), null);
 
   let worstKey = "dps", worstVal = Infinity;
   for (const k in g.comp) { if (g.comp[k] < worstVal) { worstVal = g.comp[k]; worstKey = k; } }
-  UI.fix.innerHTML = "<b>PRIORITY FIX</b><br>" + FIX_MSG[worstKey];
+  UI.fix.innerHTML = "<b>PRIORITY FIX</b><br>" + FIX_BY_CLASS[S.cls][worstKey];
 
   UI.best.textContent = best.dps > 0 ? "SESSION BEST — " + best.dps.toLocaleString() + " DPS (" + best.grade + ")" : "";
   UI.results.classList.remove("hidden");
@@ -1159,8 +1650,9 @@ function drawPlayer(t, dt, groundY) {
   cx.strokeStyle = "#4a3a6a"; cx.lineWidth = 2.5;
   cx.beginPath(); cx.moveTo(10, -4); cx.lineTo(15, -42 - raise); cx.stroke();
   const orbGlow = FX.attack > 0 ? 1 : 0.55 + Math.sin(t * 3) * 0.15;
-  cx.fillStyle = "rgba(160,107,255," + orbGlow + ")";
-  cx.shadowColor = "#a06bff"; cx.shadowBlur = 10;
+  const stormy = S && S.cls === "storm";
+  cx.fillStyle = "rgba(" + (stormy ? "61,219,217" : "160,107,255") + "," + orbGlow + ")";
+  cx.shadowColor = stormy ? "#3ddbd9" : "#a06bff"; cx.shadowBlur = 10;
   cx.beginPath(); cx.arc(15, -46 - raise, 4, 0, Math.PI * 2); cx.fill();
   cx.shadowBlur = 0;
 
@@ -1173,7 +1665,7 @@ function drawPlayer(t, dt, groundY) {
 const UI = {};
 ["bosshpfill","bosshptext","enrage","rendtag","rendbar","dpslive","castbar","castfill","castname",
  "banner","buffrow","phpfill","ult","essfill","esstext","bar","title","results","reshead","rescause",
- "grade","resmain","statlist","fix","best","startbtn","retrybtn","totitle"].forEach(id => UI[id] = document.getElementById(id));
+ "grade","resmain","statlist","fix","best","startbtn","retrybtn","totitle","options","ultkey","tutpanel","tutname","tuttext","dotlabel"].forEach(id => UI[id] = document.getElementById(id));
 UI.rendbarFill = UI.rendtag.querySelector("b");
 
 let bannerTimer = null;
@@ -1191,29 +1683,74 @@ const ICONS = {
   ruin:      '<svg viewBox="0 0 24 24"><path d="M12 2 L14 9 L21 9 L15.5 13.5 L17.5 21 L12 16.5 L6.5 21 L8.5 13.5 L3 9 L10 9 Z"/></svg>',
   riposte:   '<svg viewBox="0 0 24 24"><path d="M13 2 L4 14 h6 l-1 8 L18 10 h-6 Z"/></svg>',
   onslaught: '<svg viewBox="0 0 24 24"><path d="M12 21 V5 M6 11 L12 5 L18 11 M6 18 L12 12 L18 18"/></svg>',
-  interrupt: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.5 5.5 L18.5 18.5"/></svg>'
+  interrupt: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.5 5.5 L18.5 18.5"/></svg>',
+  jolt:      '<svg viewBox="0 0 24 24"><path d="M7 3 L15 3 L10 12 L17 12 L8 21"/></svg>',
+  conduit:   '<svg viewBox="0 0 24 24"><path d="M3 12 C6 5, 10 5, 12 12 S 18 19, 21 12"/></svg>',
+  lance:     '<svg viewBox="0 0 24 24"><path d="M12 22 V4 M8 8 L12 3 L16 8 M9 13 L12 10 L15 13"/></svg>',
+  overcharge:'<svg viewBox="0 0 24 24"><path d="M12 5 v14 M5 12 h14 M7 7 L9 9 M17 7 L15 9"/></svg>',
+  maelstrom: '<svg viewBox="0 0 24 24"><path d="M12 12 a2 2 0 0 0 2 -2 a3.5 3.5 0 0 0 -3.5 -3.5 A5.5 5.5 0 0 0 5 12 a7 7 0 0 0 7 7 a8.5 8.5 0 0 0 7 -3.5"/></svg>'
 };
 
-const BUTTONS = [
-  { id: "strike",    key: "1", sub: "+15" },
-  { id: "rend",      key: "2", sub: "20" },
-  { id: "ruin",      key: "3", sub: "40" },
-  { id: "riposte",   key: "4", sub: "PROC" },
-  { id: "onslaught", key: "5", sub: "45s" },
-  { id: "interrupt", key: "6", sub: "KICK" }
-];
+const BUTTONS_BY_CLASS = {
+  mage: [
+    { id: "strike",    name: "STRIKE",     sub: "+15" },
+    { id: "rend",      name: "REND",       sub: "-20" },
+    { id: "ruin",      name: "RUIN",       sub: "-40" },
+    { id: "riposte",   name: "RIPOSTE",    sub: "FREE" },
+    { id: "onslaught", name: "ONSLAUGHT",  sub: "45s" },
+    { id: "interrupt", name: "INTERRUPT",  sub: "" }
+  ],
+  storm: [
+    { id: "jolt",      name: "JOLT",       sub: "+15" },
+    { id: "conduit",   name: "CONDUIT",    sub: "-10" },
+    { id: "lance",     name: "STORMLANCE", sub: "2 CHG" },
+    { id: "overcharge",name: "OVERCHARGE", sub: "20s" },
+    { id: "maelstrom", name: "MAELSTROM",  sub: "30-60" },
+    { id: "interrupt", name: "INTERRUPT",  sub: "" }
+  ]
+};
+const CLASS_META = {
+  mage:  { title: "DARK BATTLEMAGE", ult: "CATACLYSM", dot: "REND" },
+  storm: { title: "TEMPEST ADEPT",   ult: "TEMPEST",   dot: "CONDUIT" }
+};
+function currentCls() { return S ? S.cls : (SETTINGS.cls === "storm" ? "storm" : "mage"); }
 
+const ABTNS = [];
 function buildBar() {
   UI.bar.innerHTML = "";
-  for (const b of BUTTONS) {
+  ABTNS.length = 0;
+  const list = BUTTONS_BY_CLASS[currentCls()];
+  for (let i = 0; i < list.length; i++) {
+    const b = list[i];
+    const wrap = document.createElement("div");
+    wrap.className = "abwrap";
     const el = document.createElement("button");
     el.className = "ab";
     el.dataset.id = b.id;
-    el.setAttribute("aria-label", b.id);
-    el.innerHTML = '<span class="key">' + b.key + "</span>" + ICONS[b.id] +
+    el.setAttribute("aria-label", b.name);
+    el.dataset.slot = "s" + (i + 1);
+    el.innerHTML = '<span class="key">' + keyDisplay(SETTINGS.keys["s" + (i + 1)]) + "</span>" + ICONS[b.id] +
       '<span class="sub">' + b.sub + '</span><div class="cdswp"></div><div class="cdnum"></div>';
-    UI.bar.appendChild(el);
+    const nm = document.createElement("span");
+    nm.className = "abname";
+    nm.textContent = b.name;
+    wrap.appendChild(el);
+    wrap.appendChild(nm);
+    UI.bar.appendChild(wrap);
+    ABTNS.push(el);
   }
+}
+
+function applyClass(cls) {
+  SETTINGS.cls = cls === "storm" ? "storm" : "mage";
+  saveSettings();
+  buildBar();
+  refreshKeyLabels();
+  const m = CLASS_META[SETTINGS.cls];
+  document.getElementById("ultname").textContent = m.ult;
+  UI.dotlabel.textContent = m.dot;
+  document.body.classList.toggle("storm", SETTINGS.cls === "storm");
+  document.querySelectorAll(".clsbtn").forEach(b => b.classList.toggle("sel", b.dataset.cls === SETTINGS.cls));
 }
 
 function sweepStyle(frac) {
@@ -1233,8 +1770,8 @@ function updateDOM(dt) {
   UI.bosshptext.textContent = (hpPct * 100).toFixed(1) + "%";
 
   const rem = Math.max(0, CONFIG.BOSS.enrageAt - S.t);
-  UI.enrage.textContent = S.enraged ? "ENRAGE" : fmtTime(rem);
-  UI.enrage.classList.toggle("hot", S.enraged || rem < 30);
+  UI.enrage.textContent = S.tutorial ? "TUTORIAL" : (S.enraged ? "ENRAGE" : fmtTime(rem));
+  UI.enrage.classList.toggle("hot", !S.tutorial && (S.enraged || rem < 30));
 
   if (S.rendLeft > 0) {
     UI.rendtag.classList.add("on");
@@ -1256,6 +1793,8 @@ function updateDOM(dt) {
     let h = "";
     if (S.onslaughtLeft > 0) h += '<span class="buff onsl">ONSLAUGHT ' + S.onslaughtLeft.toFixed(0) + "s</span>";
     if (S.overflow) h += '<span class="buff ovf">OVERFLOW ' + S.overflowLeft.toFixed(0) + "s</span>";
+    if (S.tempestLeft > 0) h += '<span class="buff onsl" style="color:var(--storm);border-color:var(--storm)">TEMPEST ' + S.tempestLeft.toFixed(0) + "s</span>";
+    if (S.overchargeStacks > 0) h += '<span class="buff ovf">OVERCHARGE x' + S.overchargeStacks + " " + S.overchargeLeft.toFixed(0) + "s</span>";
     if (S.sundered > 0) h += '<span class="buff sund">SUNDERED</span>';
     UI.buffrow.innerHTML = h;
   }
@@ -1264,28 +1803,43 @@ function updateDOM(dt) {
   UI.essfill.style.width = S.essence + "%";
   UI.esstext.textContent = Math.floor(S.essence) + " / " + CONFIG.ESSENCE_MAX;
 
-  // ult
-  const cfrac = S.charge / A.cataclysm.chargeMax;
-  UI.ult.style.background = "conic-gradient(var(--gold) " + (cfrac * 100).toFixed(1) + "%, #241a3a 0)";
-  UI.ult.classList.toggle("ready", cfrac >= 1 && !S.over);
+  // ult (Tempest is a buff — carapace never greys it for storm)
+  const cfrac = S.charge / ultMax();
+  const ultCol = S.cls === "storm" ? "var(--storm)" : "var(--gold)";
+  UI.ult.style.background = "conic-gradient(" + ultCol + " " + (cfrac * 100).toFixed(1) + "%, #241a3a 0)";
+  const ultShelled = S.carapaceLeft > 0 && S.cls === "mage";
+  UI.ult.classList.toggle("ready", cfrac >= 1 && !S.over && !ultShelled);
+  UI.ult.classList.toggle("shelled", ultShelled);
 
   // buttons
-  const gcdFrac = S.gcd / CONFIG.GCD;
-  for (const b of UI.bar.children) {
+  const gcdFrac = S.gcd / (S.gcdDur || CONFIG.GCD);
+  const ST = CONFIG.STORM;
+  for (const b of ABTNS) {
     const id = b.dataset.id;
-    let cdFrac = 0, cdLeft = 0;
+    let cdFrac = 0, cdLeft = 0, midTxt = "";
     if (id === "onslaught") { cdFrac = S.onslaughtCd / A.onslaught.cd; cdLeft = S.onslaughtCd; }
     if (id === "interrupt") { cdFrac = S.interruptCd / A.interrupt.cd; cdLeft = S.interruptCd; }
-    const frac = id === "interrupt" ? cdFrac : Math.max(cdFrac, gcdFrac);
+    if (id === "overcharge") { cdFrac = S.overchargeCd / ST.overcharge.cd; cdLeft = S.overchargeCd; }
+    if (id === "lance") {
+      if (S.lanceCharges === 0) { cdFrac = S.lanceRecharge / ST.lance.recharge; cdLeft = S.lanceRecharge; }
+      else if (S.lanceCharges < ST.lance.charges) midTxt = String(S.lanceCharges);
+    }
+    const offGcd = id === "interrupt" || id === "overcharge";
+    const frac = offGcd ? cdFrac : Math.max(cdFrac, gcdFrac);
     b.querySelector(".cdswp").style.background = sweepStyle(frac);
-    b.querySelector(".cdnum").textContent = cdLeft > CONFIG.GCD ? Math.ceil(cdLeft) : "";
+    b.querySelector(".cdnum").textContent = cdLeft > CONFIG.GCD ? Math.ceil(cdLeft) : midTxt;
 
     let dim = false;
     if (id === "rend") dim = S.essence < A.rend.cost;
     if (id === "ruin") dim = S.essence < A.ruin.cost;
     if (id === "riposte") dim = !S.overflow;
+    if (id === "conduit") dim = S.essence < ST.conduit.cost;
+    if (id === "maelstrom") dim = S.essence < ST.maelstrom.min;
+    if (id === "lance") dim = S.lanceCharges <= 0;
     b.classList.toggle("dim", dim);
-    b.classList.toggle("proc", id === "riposte" && S.overflow);
+    b.classList.toggle("proc", (id === "riposte" && S.overflow) || (id === "lance" && S.lanceFlash > 0));
+    b.classList.toggle("shelled", S.carapaceLeft > 0 &&
+      (id === "strike" || id === "ruin" || id === "riposte" || id === "jolt" || id === "ruin" || id === "lance" || id === "maelstrom"));
     b.classList.toggle("kick", id === "interrupt" && !!S.cast && !S.cast.unstoppable && S.interruptCd <= 0);
   }
 }
@@ -1304,25 +1858,48 @@ function bindInput() {
   UI.ult.addEventListener("pointerdown", e => {
     e.preventDefault();
     AudioSys.init();
-    press("cataclysm");
+    press("ult");
   });
   document.addEventListener("contextmenu", e => {
     if (e.target.closest && e.target.closest(".ab, #ult")) e.preventDefault();
   });
 
-  const keymap = { "1": "strike", "2": "rend", "3": "ruin", "4": "riposte", "5": "onslaught", "6": "interrupt", "r": "cataclysm", "R": "cataclysm", " ": "cataclysm" };
+  function actionForKey(key) {
+    const k = key.length === 1 ? key.toLowerCase() : key;
+    for (const slot in SETTINGS.keys) {
+      if (SETTINGS.keys[slot] !== k) continue;
+      if (slot === "ult") return "ult";
+      const idx = parseInt(slot.slice(1), 10) - 1;
+      const list = BUTTONS_BY_CLASS[currentCls()];
+      return list[idx] ? list[idx].id : null;
+    }
+    return null;
+  }
   document.addEventListener("keydown", e => {
+    if (captureAction) { handleCapture(e); return; }
+    if (!UI.options.classList.contains("hidden")) {
+      if (e.key === "Escape") UI.options.classList.add("hidden");
+      return;
+    }
     if (e.repeat) return;
     if (S && S.mode === "results" && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); startCombat(); return; }
     if (!S || S.mode !== "combat") {
       if (e.key === "Enter" && !UI.title.classList.contains("hidden")) startCombat();
       return;
     }
-    const id = keymap[e.key];
+    const id = actionForKey(e.key);
     if (id) { e.preventDefault(); AudioSys.init(); press(id); }
   });
 
   UI.startbtn.addEventListener("pointerdown", e => { e.preventDefault(); AudioSys.init(); startCombat(); });
+  document.getElementById("tutbtn").addEventListener("pointerdown", e => { e.preventDefault(); AudioSys.init(); startTutorial(); });
+  document.getElementById("classrow").addEventListener("pointerdown", e => {
+    const btn = e.target.closest ? e.target.closest(".clsbtn") : null;
+    if (!btn) return;
+    e.preventDefault();
+    applyClass(btn.dataset.cls);
+  });
+  document.getElementById("tutexit").addEventListener("pointerdown", e => { e.preventDefault(); exitTutorial(); });
   UI.retrybtn.addEventListener("pointerdown", e => { e.preventDefault(); AudioSys.init(); startCombat(); });
   UI.totitle.addEventListener("pointerdown", e => {
     e.preventDefault();
@@ -1333,19 +1910,104 @@ function bindInput() {
 }
 
 /* ---------------------------------------------------------------------
+   OPTIONS MENU
+--------------------------------------------------------------------- */
+let captureAction = null;
+const SLOT_LABELS = { s1: "Ability 1", s2: "Ability 2", s3: "Ability 3", s4: "Ability 4", s5: "Ability 5", s6: "Ability 6", ult: "Ultimate" };
+
+function buildKeyList() {
+  const kl = document.getElementById("keylist");
+  kl.innerHTML = "";
+  const list = BUTTONS_BY_CLASS[currentCls()];
+  for (const slot in SLOT_LABELS) {
+    const idx = parseInt(slot.slice(1), 10) - 1;
+    const label = slot === "ult" ? "Ultimate — " + CLASS_META[currentCls()].ult : list[idx].name;
+    const row = document.createElement("div");
+    row.className = "optrow";
+    row.innerHTML = '<span class="ol">' + label + '</span><button class="keybtn" data-action="' + slot + '">' + keyDisplay(SETTINGS.keys[slot]) + "</button>";
+    kl.appendChild(row);
+  }
+}
+
+function refreshKeyLabels() {
+  for (const b of ABTNS) {
+    const el = b.querySelector(".key");
+    if (el) el.textContent = keyDisplay(SETTINGS.keys[b.dataset.slot]);
+  }
+  UI.ultkey.textContent = keyDisplay(SETTINGS.keys.ult);
+}
+
+function handleCapture(e) {
+  e.preventDefault();
+  if (e.key === "Escape") { captureAction = null; buildKeyList(); return; }
+  if (e.key === "Enter") return; // reserved for menus
+  const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  for (const a in SETTINGS.keys) {
+    if (a !== captureAction && SETTINGS.keys[a] === k) SETTINGS.keys[a] = SETTINGS.keys[captureAction]; // swap
+  }
+  SETTINGS.keys[captureAction] = k;
+  captureAction = null;
+  saveSettings();
+  buildKeyList();
+  refreshKeyLabels();
+}
+
+function bindOptions() {
+  const sndtgl = document.getElementById("sndtgl");
+  const vol = document.getElementById("vol");
+  function syncSnd() { sndtgl.textContent = SETTINGS.sound ? "ON" : "OFF"; sndtgl.classList.toggle("on", SETTINGS.sound); }
+  document.getElementById("optbtn").addEventListener("pointerdown", e => {
+    e.preventDefault();
+    buildKeyList(); syncSnd(); vol.value = Math.round(SETTINGS.vol * 100);
+    UI.options.classList.remove("hidden");
+  });
+  document.getElementById("optback").addEventListener("pointerdown", e => {
+    e.preventDefault();
+    captureAction = null;
+    UI.options.classList.add("hidden");
+  });
+  sndtgl.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    SETTINGS.sound = !SETTINGS.sound;
+    saveSettings(); syncSnd();
+    AudioSys.init(); AudioSys.applyVolume();
+    if (SETTINGS.sound) sfx.proc();
+  });
+  vol.addEventListener("input", () => { SETTINGS.vol = vol.value / 100; AudioSys.applyVolume(); saveSettings(); });
+  vol.addEventListener("change", () => { AudioSys.init(); AudioSys.applyVolume(); if (SETTINGS.sound) sfx.strike(); });
+  document.getElementById("keylist").addEventListener("pointerdown", e => {
+    const btn = e.target.closest ? e.target.closest(".keybtn") : null;
+    if (!btn) return;
+    e.preventDefault();
+    captureAction = btn.dataset.action;
+    buildKeyList();
+    const active = document.querySelector('.keybtn[data-action="' + captureAction + '"]');
+    if (active) { active.classList.add("listen"); active.textContent = "PRESS KEY"; }
+  });
+  document.getElementById("keyreset").addEventListener("pointerdown", e => {
+    e.preventDefault();
+    SETTINGS.keys = Object.assign({}, DEFAULT_KEYS);
+    captureAction = null;
+    saveSettings(); buildKeyList(); refreshKeyLabels();
+  });
+}
+
+/* ---------------------------------------------------------------------
    GAME FLOW / MAIN LOOP
 --------------------------------------------------------------------- */
 function startCombat() {
   AudioSys.castStop(); AudioSys.rumbleStop();
-  S = freshState();
+  S = freshState(SETTINGS.cls);
   FX.reset();
   UI.title.classList.add("hidden");
   UI.results.classList.add("hidden");
   UI.castbar.classList.add("hidden");
+  UI.tutpanel.classList.add("hidden");
   UI.buffrow.innerHTML = "";
-  bannerMsg("PULL!", "var(--ink)");
-  AudioSys.tone(392, .12, "square", .18);
-  AudioSys.tone(523, .2, "square", .18, null, .12);
+  UI.banner.textContent = "FIRST ABILITY PULLS";
+  UI.banner.style.color = "var(--dim)";
+  UI.banner.classList.add("show");
+  if (bannerTimer) { clearTimeout(bannerTimer); bannerTimer = null; }
 }
 
 let last = performance.now();
@@ -1366,10 +2028,18 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 
-document.addEventListener("visibilitychange", () => { last = performance.now(); });
+document.addEventListener("visibilitychange", () => {
+  last = performance.now();
+  try {
+    if (document.hidden) { if (AudioSys.silent) AudioSys.silent.pause(); }
+    else if (SETTINGS.sound && AudioSys.ctx) AudioSys.unlockRoute();
+  } catch (e) {}
+});
 
-buildBar();
+loadSettings();
 bindInput();
+bindOptions();
+applyClass(SETTINGS.cls);
 resize();
 requestAnimationFrame(frame);
 </script>
